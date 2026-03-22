@@ -27,7 +27,7 @@ VinConfig must be present on the client side. Add it as a required dependency in
 MODS.TOML[[dependencies.yourmodid]]
     modId = "vinconfig"
     mandatory = true
-    versionRange = "[0.0.0.1,)"
+    versionRange = "[0.0.4.2,)"
     ordering = "NONE"
     side = "CLIENT"
 Additionally, add the library to your build system so it is available at compile time (example only - verify coordinates for your setup):
