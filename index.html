@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VinConfig — Developer Wiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f7f4;
+    --bg2: #f0ede8;
+    --bg3: #e8e4de;
+    --sidebar-bg: #1a1a2e;
+    --sidebar-hover: #16213e;
+    --sidebar-active: #0f3460;
+    --accent: #e94560;
+    --accent2: #4fd1c5;
+    --text: #1a1a1a;
+    --text-muted: #5c5c5c;
+    --text-light: #8a8a8a;
+    --border: #d8d4cc;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-keyword: #cba6f7;
+    --code-string: #a6e3a1;
+    --code-comment: #6c7086;
+    --code-type: #89b4fa;
+    --code-number: #fab387;
+    --code-method: #89dceb;
+    --tag-bg: #e94560;
+    --tag-text: #fff;
+    --note-bg: #fff8e6;
+    --note-border: #f59e0b;
+    --tip-bg: #edfaf7;
+    --tip-border: #4fd1c5;
+    --warn-bg: #fff1f2;
+    --warn-border: #e94560;
+    --sidebar-w: 270px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--sidebar-bg);
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    transition: transform .3s ease;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    flex-shrink: 0;
+  }
+  .sidebar-logo h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #fff;
+    letter-spacing: -.5px;
+  }
+  .sidebar-logo .version-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 4px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .sidebar-logo p {
+    color: rgba(255,255,255,.4);
+    font-size: .78rem;
+    margin-top: 4px;
+  }
+
+  .sidebar-section {
+    padding: 14px 0 4px;
+  }
+  .sidebar-section:last-child {
+    padding-bottom: 20px;
+  }
+  .sidebar-section-title {
+    color: rgba(255,255,255,.3);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 0 20px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    color: rgba(255,255,255,.65);
+    font-size: .88rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all .18s ease;
+    text-decoration: none;
+    font-weight: 400;
+  }
+  .nav-item:hover {
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    border-left-color: rgba(255,255,255,.2);
+  }
+  .nav-item.active {
+    background: rgba(233,69,96,.12);
+    color: #fff;
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+
+  /* ── MAIN CONTENT ── */
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 52px 48px 80px;
+    overflow-x: hidden;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 2px solid var(--border);
+  }
+  .page-header .breadcrumb {
+    font-size: .78rem;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    letter-spacing: .3px;
+  }
+  .page-header h2 {
+    font-family: 'Lora', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .page-header .subtitle {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  /* ── HEADINGS ── */
+  h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 32px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+  }
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 24px 0 8px;
+    line-height: 1.4;
+  }
+  .card h4 {
+    margin: 0 0 6px;
+    border: none;
+    padding: 0;
+    font-size: .95rem;
+  }
+
+  /* ── PROSE ── */
+  p {
+    line-height: 1.75;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    font-size: .97rem;
+  }
+  strong { color: var(--text); }
+  em { font-style: italic; }
+
+  /* ── CODE ── */
+  code {
+    font-family: 'Fira Code', monospace;
+    font-size: .82em;
+    background: rgba(0,0,0,.06);
+    color: #c0392b;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 18px 0 24px;
+    position: relative;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  pre .pre-label {
+    position: absolute;
+    top: 10px; right: 14px;
+    font-family: 'Fira Code', monospace;
+    font-size: .68rem;
+    color: rgba(255,255,255,.25);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  pre code {
+    display: block;
+    padding: 20px 22px;
+    font-size: .83rem;
+    line-height: 1.75;
+    background: none;
+    color: var(--code-text);
+    white-space: pre;
+    tab-size: 4;
+  }
+
+  /* Syntax highlight classes */
+  .kw  { color: var(--code-keyword); }
+  .st  { color: var(--code-string); }
+  .cm  { color: var(--code-comment); font-style: italic; }
+  .ty  { color: var(--code-type); }
+  .nu  { color: var(--code-number); }
+  .mt  { color: var(--code-method); }
+  .an  { color: #f9e2af; } /* annotation */
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: .92rem;
+    line-height: 1.65;
+  }
+  .callout p { margin: 0; color: inherit; font-size: inherit; line-height: 1.65; }
+  .callout.note { background: var(--note-bg); border-left: 4px solid var(--note-border); color: #7c5a00; }
+  .callout.tip  { background: var(--tip-bg);  border-left: 4px solid var(--tip-border);  color: #1a6b5f; }
+  .callout.warn { background: var(--warn-bg); border-left: 4px solid var(--warn-border); color: #8b1a2b; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 18px 0 24px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+  }
+  th {
+    background: var(--sidebar-bg);
+    color: rgba(255,255,255,.85);
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 500;
+    font-size: .82rem;
+    letter-spacing: .4px;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── CARDS / FEATURES ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+    margin: 20px 0 28px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px 16px;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.07); transform: translateY(-2px); }
+  .card h4 { margin: 0 0 6px; font-size: .95rem; border: none; padding: 0; }
+  .card p { font-size: .84rem; margin: 0; }
+
+  /* ── TAG ── */
+  .tag {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .tag-red   { background: #fee2e2; color: #b91c1c; }
+  .tag-green { background: #dcfce7; color: #166534; }
+  .tag-blue  { background: #dbeafe; color: #1d4ed8; }
+  .tag-teal  { background: #ccfbf1; color: #0f766e; }
+  .tag-amber { background: #fef9c3; color: #92400e; }
+  .tag-purple{ background: #ede9fe; color: #6d28d9; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+
+  .hero-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #16213e 100%);
+    border-radius: 14px;
+    padding: 36px 36px 32px;
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(233,69,96,.25), transparent 70%);
+  }
+  .hero-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 60px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,209,197,.15), transparent 70%);
+  }
+  .hero-banner h2 {
+    font-family: 'Lora', serif;
+    color: #fff;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    position: relative;
+    display: block;
+  }
+  .hero-banner p {
+    color: rgba(255,255,255,.65);
+    max-width: 560px;
+    margin: 0;
+    position: relative;
+  }
+  .hero-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    position: relative;
+  }
+  .hero-badge {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.8);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: .8rem;
+    font-weight: 500;
+  }
+
+  /* ── STEP LIST ── */
+  .step-list { list-style: none; counter-reset: steps; margin: 18px 0 24px; }
+  .step-list li {
+    counter-increment: steps;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .step-list li::before {
+    content: counter(steps);
+    background: var(--accent);
+    color: #fff;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-list li div { flex: 1; }
+  .step-list li strong { display: block; margin-bottom: 4px; color: var(--text); }
+  .step-list li p { margin: 4px 0 0; font-size: .92rem; line-height: 1.65; }
+
+  /* ── PARAM TABLE ── */
+  .param-table { margin: 12px 0 24px; }
+  .param-row {
+    display: grid;
+    grid-template-columns: 200px 80px 1fr;
+    gap: 0 8px;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+    font-size: .88rem;
+    align-items: baseline;
+    word-break: break-word;
+  }
+  .param-row:last-child { border-bottom: none; }
+  .param-name { font-family: 'Fira Code', monospace; color: #1d4ed8; font-size: .79rem; word-break: break-all; }
+  .param-type { color: var(--text-light); font-size: .8rem; padding: 0 8px; }
+  .param-desc { color: var(--text-muted); line-height: 1.55; }
+  .param-header {
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-light);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 2px;
+  }
+
+  /* TOC */
+  .toc {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-size: .88rem;
+  }
+  .toc-title { font-weight: 600; margin-bottom: 10px; color: var(--text); font-size: .9rem; }
+  .toc ol { padding-left: 18px; }
+  .toc li { margin-bottom: 5px; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* scrollbar */
+  #sidebar::-webkit-scrollbar { width: 5px; }
+  #sidebar::-webkit-scrollbar-track { background: rgba(0,0,0,.2); }
+  #sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); border-radius: 3px; }
+  #sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.4); }
+
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: none; }
+    #main { margin-left: 0; }
+    .page-inner { padding: 24px 18px 60px; }
+    .page-header h2 { font-size: 1.6rem; }
+    .param-row { grid-template-columns: 1fr; }
+  }
+
+  /* Floating LLM doc button */
+  .llm-btn {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 300;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,.18);
+    font-size: .9rem;
+  }
+  .llm-btn:hover { transform: translateY(-1px); }
+
+  .download-btn {
+    display: inline-block;
+    background: var(--accent2);
+    color: #042022;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <h1>VinConfig</h1>
+    <p>Developer Reference Wiki</p>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Getting Started</div>
+    <a class="nav-item active" onclick="show('quickstart')">
+      Quick Start
+    </a>
+    <a class="nav-item" onclick="show('registration')">
+      Registration
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Config Entries</div>
+    <a class="nav-item" onclick="show('boolean')">
+      Boolean Toggle
+    </a>
+    <a class="nav-item" onclick="show('int-slider')">
+      Integer Slider
+    </a>
+    <a class="nav-item" onclick="show('double-slider')">
+      Double Slider
+    </a>
+    <a class="nav-item" onclick="show('text')">
+      Text Field
+    </a>
+    <a class="nav-item" onclick="show('enum')">
+      Enum Cycle
+    </a>
+    <a class="nav-item" onclick="show('color')">
+      Color Picker
+    </a>
+    <a class="nav-item" onclick="show('action')">
+      Action Button
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Bindings</div>
+    <a class="nav-item" onclick="show('bindings')">
+      Value Bindings
+    </a>
+    <a class="nav-item" onclick="show('custom-binding')">
+      Custom Bindings
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">UI & Visuals</div>
+    <a class="nav-item" onclick="show('preview')">
+      Preview Panel
+    </a>
+    <a class="nav-item" onclick="show('theme')">
+      Theming
+    </a>
+    <a class="nav-item" onclick="show('live-theme')">
+      Live Theme
+    </a>
+    <a class="nav-item" onclick="show('background')">
+      Background Renderer
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Advanced</div>
+    <a class="nav-item" onclick="show('state')">
+      Config State
+    </a>
+    <a class="nav-item" onclick="show('persistence')">
+      Persistence / TOML
+    </a>
+    <a class="nav-item" onclick="show('onchanged')">
+      Callbacks
+    </a>
+    <a class="nav-item" onclick="show('full-example')">
+      Full Example
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Reference</div>
+    <a class="nav-item" onclick="show('api-ref')">
+      API Reference
+    </a>
+  </div>
+</nav>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<main id="main">
+
+  <button class="llm-btn" onclick="show('full-doc-llm')">Full doc for LLM</button>
+
+<!-- ── PAGE: QUICK START ── -->
+<div class="page active" id="p-quickstart">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Getting Started</div>
+    <h2>Quick Start</h2>
+    <p class="subtitle">From zero to a working config screen in under 5 minutes.</p>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">On this page</div>
+    <ol>
+      <li><a href="#qs-deps">1. Declare dependency</a></li>
+      <li><a href="#qs-forge">2. Create ForgeConfigSpec</a></li>
+      <li><a href="#qs-register">3. Register spec in mod constructor</a></li>
+      <li><a href="#qs-definition">4. Build VinConfigDefinition</a></li>
+      <li><a href="#qs-open">5. Register config screen</a></li>
+    </ol>
+  </div>
+
+  <h3 id="qs-deps">Step 1 — Declare dependency</h3>
+  <p>VinConfig must be present on the <strong>client</strong> side. Add it as a required dependency in your <code>mods.toml</code>:</p>
+  <pre><span class="pre-label">mods.toml</span><code><span class="cm">[[dependencies.yourmodid]]</span>
+    modId = <span class="st">"vinconfig"</span>
+    mandatory = <span class="kw">true</span>
+    versionRange = <span class="st">"[0.0.0.1,)"</span>
+    ordering = <span class="st">"NONE"</span>
+    side = <span class="st">"CLIENT"</span></code></pre>
+
+  <p>Additionally, add the library to your build system so it is available at compile time (example only — verify coordinates for your setup):</p>
+  <pre><span class="pre-label">Gradle (example)</span><code>// THIS IS AN EXAMPLE coordinate — check the correct groupId/artifactId/version for your environment
+implementation "com.vinlanx:vinconfig:1.0.0"
+</code></pre>
+
+  <h3 id="qs-forge">Step 2 — Create your ForgeConfigSpec</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="kw">public final class</span> <span class="ty">MyConfig</span> {
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span> SPEC;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">BooleanValue</span>  SHOW_HUD;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">IntValue</span>     HUD_SCALE;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">DoubleValue</span>  OPACITY;
+
+    <span class="kw">static</span> {
+        <span class="ty">ForgeConfigSpec</span>.<span class="ty">Builder</span> b = <span class="kw">new</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">Builder</span>();
+        b.<span class="mt">push</span>(<span class="st">"hud"</span>);
+        SHOW_HUD  = b.<span class="mt">define</span>(<span class="st">"show_hud"</span>, <span class="kw">true</span>);
+        HUD_SCALE = b.<span class="mt">defineInRange</span>(<span class="st">"hud_scale"</span>, <span class="nu">100</span>, <span class="nu">50</span>, <span class="nu">200</span>);
+        OPACITY   = b.<span class="mt">defineInRange</span>(<span class="st">"opacity"</span>, <span class="nu">1.0</span>, <span class="nu">0.0</span>, <span class="nu">1.0</span>);
+        b.<span class="mt">pop</span>();
+        SPEC = b.<span class="mt">build</span>();
+    }
+}</code></pre>
+
+  <h3 id="qs-register">Step 3 — Register spec in mod constructor</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import net.minecraftforge.api.distmarker.Dist;</span>
+<span class="cm">import net.minecraftforge.fml.common.Mod;</span>
+<span class="cm">import net.minecraftforge.fml.ModLoadingContext;</span>
+<span class="cm">import net.minecraftforge.fml.config.ModConfig;</span>
+<span class="cm">import net.minecraftforge.fml.loading.FMLEnvironment;</span>
+
+<span class="an">@Mod</span>(<span class="st">"yourmod"</span>)
+<span class="kw">public final class</span> <span class="ty">YourMod</span> {
+    <span class="kw">public</span> <span class="ty">YourMod</span>() {
+        <span class="ty">ModLoadingContext</span>.<span class="mt">get</span>().<span class="mt">registerConfig</span>(<span class="ty">ModConfig</span>.<span class="ty">Type</span>.CLIENT, <span class="ty">MyConfig</span>.SPEC);
+        <span class="kw">if</span> (<span class="ty">FMLEnvironment</span>.dist == <span class="ty">Dist</span>.CLIENT) {
+            <span class="ty">MyClientSetup</span>.<span class="mt">bootstrap</span>();
+        }
+    }
+}</code></pre>
+
+  <h3 id="qs-definition">Step 4 — Build VinConfigDefinition (client side)</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigCategory;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigDefinition;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.client.VinConfigClientApi;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="kw">public final class</span> <span class="ty">MyClientSetup</span> {
+    <span class="kw">public static void</span> <span class="mt">bootstrap</span>() {
+        <span class="ty">VinConfigBooleanEntry</span> showHud = <span class="ty">VinConfigBooleanEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"show_hud"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Show HUD"</span>), <span class="kw">true</span>)
+            .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.SHOW_HUD)
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Toggle the heads-up display."</span>))
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigIntSliderEntry</span> scale = <span class="ty">VinConfigIntSliderEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"hud_scale"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"HUD Scale"</span>), <span class="nu">100</span>, <span class="nu">50</span>, <span class="nu">200</span>)
+            .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.HUD_SCALE)
+            .<span class="mt">suffix</span>(<span class="st">"%"</span>)
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigDefinition</span> def = <span class="ty">VinConfigDefinition</span>
+            .<span class="mt">builder</span>(<span class="st">"yourmod"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Your Mod Settings"</span>))
+            .<span class="mt">subtitle</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Configure the mod to your liking"</span>))
+            .<span class="mt">category</span>(
+                <span class="ty">VinConfigCategory</span>.<span class="mt">builder</span>(<span class="st">"hud"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"HUD"</span>))
+                    .<span class="mt">entry</span>(showHud)
+                    .<span class="mt">entry</span>(scale)
+                    .<span class="mt">build</span>()
+            )
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigClientApi</span>.<span class="mt">registerConfigScreen</span>(def);
+    }
+}</code></pre>
+
+  <h3 id="qs-open">Step 5 — Done!</h3>
+  <p>Calling <code>VinConfigClientApi.registerConfigScreen(def)</code> does two things simultaneously:</p>
+  <ul style="padding-left:20px;margin-bottom:14px;line-height:2;">
+    <li>Registers the definition in the global <code>VinConfigApi</code> registry so other mods can look it up.</li>
+    <li>Calls <code>MinecraftForge.registerConfigScreen()</code> so your mod's "Config" button in the mod list opens your new screen.</li>
+  </ul>
+
+  <div class="callout tip">
+    <p>You can also open the screen manually with <code>VinConfigClientApi.open(parentScreen, definition)</code> — useful if you want to trigger it from a keybinding or in-game button.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: REGISTRATION ── -->
+<div class="page" id="p-registration">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Getting Started</div>
+    <h2>Registration</h2>
+    <p class="subtitle">How to register your config definition and retrieve it from other code.</p>
+  </div>
+
+  <h3>VinConfigApi — Global Registry</h3>
+  <p><code>VinConfigApi</code> is a thread-safe global map from <code>modId → VinConfigDefinition</code>. It is the lightweight registry used by VinConfig to store definitions that have been registered during client setup.</p>
+
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigApi;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigDefinition;</span>
+<span class="cm">import java.util.Optional;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="cm">// Register a definition</span>
+<span class="ty">VinConfigApi</span>.<span class="mt">register</span>(myDefinition);
+
+<span class="cm">// Look up any registered mod's definition</span>
+<span class="ty">Optional</span>&lt;<span class="ty">VinConfigDefinition</span>&gt; def = <span class="ty">VinConfigApi</span>.<span class="mt">get</span>(<span class="st">"somemodid"</span>);
+
+<span class="cm">// Build a definition using the convenience method</span>
+<span class="ty">VinConfigDefinition</span>.<span class="ty">Builder</span> builder = <span class="ty">VinConfigApi</span>.<span class="mt">definition</span>(<span class="st">"yourmod"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Title"</span>));</code></pre>
+
+  <h3>VinConfigClientApi — Client Screen</h3>
+  <p>Only call this from the client dist. Both methods are safe to call in <code>@Mod</code> constructor when guarded by <code>FMLEnvironment.dist == Dist.CLIENT</code>.</p>
+
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Returns</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">registerConfigScreen(def)</span>
+      <span class="param-type">void</span>
+      <span class="param-desc">Registers the definition AND hooks it as the Forge mod-list config screen.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">open(parent, def)</span>
+      <span class="param-type">Screen</span>
+      <span class="param-desc">Returns a new <code>VinConfigScreen</code> you can push manually. Does <em>not</em> register anything.</span>
+    </div>
+  </div>
+
+  <h3>VinConfigDefinition Builder</h3>
+  <p>Every config screen starts with a definition. Here are all the builder methods:</p>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(modId, title)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Start building. <code>modId</code> is your mod's ID string.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.subtitle(component)</span>
+      <span class="param-type">Component</span>
+      <span class="param-desc">Short description shown under the title. Supports word wrap.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.theme(VinConfigTheme)</span>
+      <span class="param-type">static theme</span>
+      <span class="param-desc">Apply a static color theme. Use <code>VinConfigTheme.darkCinema()</code> for default.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.liveTheme(state → theme)</span>
+      <span class="param-type">Function</span>
+      <span class="param-desc">Dynamic theme that re-evaluates on every frame using the current working state.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.background(renderer)</span>
+      <span class="param-type">functional</span>
+      <span class="param-desc">Custom background drawn before the gradient fill. Receives GuiGraphics, size, theme, mouse pos.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.category(VinConfigCategory)</span>
+      <span class="param-type">repeatable</span>
+      <span class="param-desc">Add a tab category. Call multiple times to add multiple tabs.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.build()</span>
+      <span class="param-type">→ Definition</span>
+      <span class="param-desc">Produce the immutable <code>VinConfigDefinition</code> record.</span>
+    </div>
+  </div>
+
+  <h3>VinConfigCategory Builder</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(id, title)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Start. <code>id</code> is an internal string key for this tab.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.description(component)</span>
+      <span class="param-type">Component</span>
+      <span class="param-desc">Subtitle shown below the category name at the top of the content area.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.entry(VinConfigEntry)</span>
+      <span class="param-type">repeatable</span>
+      <span class="param-desc">Add any entry type. Order is preserved.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.build()</span>
+      <span class="param-type">→ Category</span>
+      <span class="param-desc">Returns an immutable category record.</span>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: BOOLEAN ── -->
+<div class="page" id="p-boolean">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Config Entries</div>
+    <h2>Boolean Toggle <span class="tag tag-green">VinConfigBooleanEntry</span></h2>
+    <p class="subtitle">An ON/OFF toggle switch. The most common entry type — use it for feature flags and visibility toggles.</p>
+  </div>
+
+  <h3>Builder Parameters</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(key, title, default)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Required. <code>key</code> is a unique string for this entry. <code>default</code> is the fallback boolean value.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.description(component)</span>
+      <span class="param-type">Component</span>
+      <span class="param-desc">Tooltip + subtitle shown in the row card.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.forge(BooleanValue)</span>
+      <span class="param-type">ForgeConfigSpec</span>
+      <span class="param-desc">Bind to a Forge config value. Handles get/set/save automatically.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.binding(binding)</span>
+      <span class="param-type">VinConfigValueBinding</span>
+      <span class="param-desc">Bind to a custom binding. Use when not using ForgeConfigSpec.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.preview((state, val) → …)</span>
+      <span class="param-type">BiFunction</span>
+      <span class="param-desc">Return a <code>VinConfigPreview</code> to show in the right panel when this row is hovered.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.onChanged((state, val) → …)</span>
+      <span class="param-type">BiConsumer</span>
+      <span class="param-desc">Called immediately when the user toggles the value.</span>
+    </div>
+  </div>
+
+  <h3>Basic Example</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="ty">VinConfigBooleanEntry</span> entry = <span class="ty">VinConfigBooleanEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"show_hud"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Show HUD"</span>), <span class="kw">true</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.SHOW_HUD)
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Toggles the heads-up display overlay."</span>))
+    .<span class="mt">build</span>();</code></pre>
+
+  <h3>With Conditional Preview Images</h3>
+  <p>One of VinConfig's most powerful features: show a <strong>different image</strong> depending on whether the toggle is ON or OFF. This is perfect for visual settings like enabling RTX, night vision, shaders, etc.</p>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="ty">VinConfigBooleanEntry</span> rtxEnabled = <span class="ty">VinConfigBooleanEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"rtx_enabled"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"RTX Lighting"</span>), <span class="kw">false</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.RTX_ENABLED)
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">translatable</span>(<span class="st">"tooltip.yourmod.rtx_enabled"</span>))
+    .<span class="mt">preview</span>((state, value) -> {
+        <span class="kw">boolean</span> enabled = <span class="ty">Boolean</span>.<span class="kw">TRUE</span>.<span class="mt">equals</span>(value);
+        <span class="ty">String</span> img = enabled ? <span class="st">"rt_on.png"</span> : <span class="st">"rt_off.png"</span>;
+        <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(
+            <span class="st">"yourmod"</span>, img,
+            <span class="ty">Component</span>.<span class="mt">literal</span>(enabled ? <span class="st">"RTX: ON"</span> : <span class="st">"RTX: OFF"</span>),
+            <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Ray-traced lighting changes the look dramatically."</span>)
+        );
+    })
+    .<span class="mt">build</span>();</code></pre>
+
+  <div class="callout tip">
+    <p>Place your preview images at <code>assets/yourmod/configpic/rt_on.png</code> and <code>assets/yourmod/configpic/rt_off.png</code>. VinConfigPreview.configPic() automatically prepends the <code>configpic/</code> path.</p>
+  </div>
+
+  <h3>With onChanged callback</h3>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="ty">VinConfigBooleanEntry</span> nightMode = <span class="ty">VinConfigBooleanEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"night_mode"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Night Mode"</span>), <span class="kw">false</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.NIGHT_MODE)
+    .<span class="mt">onChanged</span>((state, value) -> {
+        <span class="cm">// Runs immediately when toggled — before Save is pressed</span>
+        <span class="ty">NightModeManager</span>.<span class="mt">setActive</span>(value);
+    })
+    .<span class="mt">build</span>();</code></pre>
+
+  <div class="callout note">
+    <p>The <code>onChanged</code> callback fires on every toggle change in the <em>working state</em>, not only on final Save. The callback receives the current <code>VinConfigState</code> and the new value, so you can read other settings too.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: INT SLIDER ── -->
+<div class="page" id="p-int-slider">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Config Entries</div>
+    <h2>Integer Slider <span class="tag tag-blue">VinConfigIntSliderEntry</span></h2>
+    <p class="subtitle">A draggable slider for integer values with optional step snapping and value suffix.</p>
+  </div>
+
+  <h3>Builder Parameters</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(key, title, default, min, max)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Required. Sets default value and inclusive range.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.step(int)</span>
+      <span class="param-type">int</span>
+      <span class="param-desc">Snap interval. Default = 1. E.g., step(5) makes the slider jump 0, 5, 10, 15…</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.suffix(String)</span>
+      <span class="param-type">String</span>
+      <span class="param-desc">Appended to the displayed value, e.g. <code>"%"</code>, <code>" px"</code>, <code>" fps"</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.forge(IntValue)</span>
+      <span class="param-type">ForgeConfigSpec</span>
+      <span class="param-desc">Two-way binding to a <code>ForgeConfigSpec.IntValue</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.binding(binding)</span>
+      <span class="param-type">VinConfigValueBinding</span>
+      <span class="param-desc">Custom binding when not using Forge.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.description(component)</span>
+      <span class="param-type">Component</span>
+      <span class="param-desc">Tooltip + row subtitle.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.preview(…) / .onChanged(…)</span>
+      <span class="param-type">BiFunction/BiConsumer</span>
+      <span class="param-desc">Preview factory and change callback. Same semantics as Boolean.</span>
+    </div>
+  </div>
+
+  <h3>Examples</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraft.util.Mth;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// Simple percentage slider</span>
+<span class="ty">VinConfigIntSliderEntry</span> volume = <span class="ty">VinConfigIntSliderEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"music_volume"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Music Volume"</span>), <span class="nu">80</span>, <span class="nu">0</span>, <span class="nu">100</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.MUSIC_VOLUME)
+    .<span class="mt">suffix</span>(<span class="st">"%"</span>)
+    .<span class="mt">build</span>();
+
+<span class="cm">// Slider that snaps to multiples of 5</span>
+<span class="ty">VinConfigIntSliderEntry</span> frameLimit = <span class="ty">VinConfigIntSliderEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"frame_limit"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Frame Limit"</span>), <span class="nu">60</span>, <span class="nu">30</span>, <span class="nu">240</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.FRAME_LIMIT)
+    .<span class="mt">step</span>(<span class="nu">5</span>)
+    .<span class="mt">suffix</span>(<span class="st">" fps"</span>)
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Maximum frames per second."</span>))
+    .<span class="mt">build</span>();
+
+<span class="cm">// Dynamic preview that changes based on chosen value</span>
+<span class="ty">VinConfigIntSliderEntry</span> quality = <span class="ty">VinConfigIntSliderEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"quality"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Render Quality"</span>), <span class="nu">2</span>, <span class="nu">1</span>, <span class="nu">4</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.QUALITY)
+    .<span class="mt">preview</span>((state, value) -> {
+        <span class="ty">String</span>[] images = { <span class="st">"q_low.png"</span>, <span class="st">"q_med.png"</span>, <span class="st">"q_high.png"</span>, <span class="st">"q_ultra.png"</span> };
+        <span class="kw">int</span> idx = <span class="ty">Mth</span>.<span class="mt">clamp</span>(value - <span class="nu">1</span>, <span class="nu">0</span>, <span class="nu">3</span>);
+        <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, images[idx],
+            <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Quality level "</span> + value),
+            <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Higher values look better but cost performance."</span>));
+    })
+    .<span class="mt">build</span>();</code></pre>
+
+  <h3>Sanitization</h3>
+  <p>Values are automatically clamped to <code>[min, max]</code> and snapped to the nearest step. This happens both when reading from config and when the user drags the slider. You never need to clamp manually.</p>
+
+</div>
+</div>
+
+<!-- ── PAGE: DOUBLE SLIDER ── -->
+<div class="page" id="p-double-slider">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Config Entries</div>
+    <h2>Double Slider <span class="tag tag-teal">VinConfigDoubleSliderEntry</span></h2>
+    <p class="subtitle">A floating-point slider with configurable step precision and suffix formatting.</p>
+  </div>
+
+  <h3>Builder Parameters</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(key, title, default, min, max)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Required. All values are <code>double</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.step(double)</span>
+      <span class="param-type">double</span>
+      <span class="param-desc">Snap resolution. Default = 0.01. Set to 0 for continuous.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.suffix(String)</span>
+      <span class="param-type">String</span>
+      <span class="param-desc">Appended after the <code>%.2f</code> formatted value. E.g. <code>"x"</code> → <code>"1.50x"</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.forge(DoubleValue)</span>
+      <span class="param-type">ForgeConfigSpec</span>
+      <span class="param-desc">Bind to <code>ForgeConfigSpec.DoubleValue</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.binding / .description / .preview / .onChanged</span>
+      <span class="param-type">—</span>
+      <span class="param-desc">Same as other entry types.</span>
+    </div>
+  </div>
+
+  <h3>Examples</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigDoubleSliderEntry;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// Animation speed multiplier</span>
+<span class="ty">VinConfigDoubleSliderEntry</span> animSpeed = <span class="ty">VinConfigDoubleSliderEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"anim_speed"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Animation Speed"</span>), <span class="nu">1.0</span>, <span class="nu">0.4</span>, <span class="nu">2.5</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.ANIM_SPEED)
+    .<span class="mt">step</span>(<span class="nu">0.05</span>)
+    .<span class="mt">suffix</span>(<span class="st">"x"</span>)
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"1.0x is default speed."</span>))
+    .<span class="mt">build</span>();
+
+<span class="cm">// Opacity from 0% to 100% in 5% increments</span>
+<span class="ty">VinConfigDoubleSliderEntry</span> opacity = <span class="ty">VinConfigDoubleSliderEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"bg_opacity"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Background Opacity"</span>), <span class="nu">0.8</span>, <span class="nu">0.0</span>, <span class="nu">1.0</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.BG_OPACITY)
+    .<span class="mt">step</span>(<span class="nu">0.05</span>)
+    .<span class="mt">suffix</span>(<span class="st">""</span>)
+    .<span class="mt">build</span>();</code></pre>
+
+  <h3>Displayed Format</h3>
+  <p>Values are displayed as <code>"%.2f%s"</code> — always two decimal places followed by the suffix. This is handled automatically by <code>VinConfigDoubleSliderEntry.format(double value)</code>. You don't need to call it yourself.</p>
+
+</div>
+</div>
+
+<!-- ── PAGE: TEXT ── -->
+<div class="page" id="p-text">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Config Entries</div>
+    <h2>Text Field <span class="tag tag-purple">VinConfigTextEntry</span></h2>
+    <p class="subtitle">A single-line editable text input with configurable maximum length.</p>
+  </div>
+
+  <h3>Builder Parameters</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(key, title, defaultValue)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Required. <code>defaultValue</code> is the initial string.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.maxLength(int)</span>
+      <span class="param-type">int</span>
+      <span class="param-desc">Maximum character count. Default = 128. Strings longer than this are silently truncated on sanitization.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.forge(ConfigValue&lt;String&gt;)</span>
+      <span class="param-type">ForgeConfigSpec</span>
+      <span class="param-desc">Bind to a Forge string config value.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.binding / .description / .preview / .onChanged</span>
+      <span class="param-type">—</span>
+      <span class="param-desc">Same as other entry types.</span>
+    </div>
+  </div>
+
+  <h3>Examples</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigTextEntry;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// Short player title/label</span>
+<span class="ty">VinConfigTextEntry</span> playerTitle = <span class="ty">VinConfigTextEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"player_title"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Player Title"</span>), <span class="st">"Explorer"</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.PLAYER_TITLE)
+    .<span class="mt">maxLength</span>(<span class="nu">24</span>)
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Short tag displayed above your character."</span>))
+    .<span class="mt">build</span>();
+
+<span class="cm">// Server address with longer limit</span>
+<span class="ty">VinConfigTextEntry</span> serverAddr = <span class="ty">VinConfigTextEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"server_address"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Server Address"</span>), <span class="st">"play.example.com"</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.SERVER_ADDR)
+    .<span class="mt">maxLength</span>(<span class="nu">255</span>)
+    .<span class="mt">build</span>();
+
+<span class="cm">// Text that affects the live preview</span>
+<span class="ty">VinConfigTextEntry</span> heroTitle = <span class="ty">VinConfigTextEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"hero_title"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Hero Title"</span>), <span class="st">"My cinematic config"</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.HERO_TITLE)
+    .<span class="mt">maxLength</span>(<span class="nu">42</span>)
+    .<span class="mt">preview</span>((state, value) ->
+        <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, <span class="st">"title_preview.png"</span>,
+            <span class="ty">Component</span>.<span class="mt">literal</span>(value),
+            <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"This text will appear in the UI."</span>)))
+    .<span class="mt">build</span>();</code></pre>
+
+  <div class="callout note">
+    <p>The text field renders as a styled <code>EditBox</code> that matches the current theme colors. The cursor blinks and selection works normally. It ticks every frame to update the cursor animation.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: ENUM ── -->
+<div class="page" id="p-enum">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Config Entries</div>
+    <h2>Enum Cycle <span class="tag tag-amber">VinConfigEnumEntry</span></h2>
+    <p class="subtitle">A left/right cycle button that steps through all values of a Java enum. Optionally provide custom display labels.</p>
+  </div>
+
+  <h3>Builder Parameters</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(key, title, enumClass, default)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Required. Reads all constants from the enum via reflection.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.labels(E → Component)</span>
+      <span class="param-type">Function</span>
+      <span class="param-desc">Map each enum constant to a display component. Default: <code>Component.literal(e.name())</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.forge(EnumValue&lt;E&gt;)</span>
+      <span class="param-type">ForgeConfigSpec</span>
+      <span class="param-desc">Bind to a Forge enum config value.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.binding / .description / .preview / .onChanged</span>
+      <span class="param-type">—</span>
+      <span class="param-desc">Same as other entry types.</span>
+    </div>
+  </div>
+
+  <h3>Define an Enum</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">// In your config class or a standalone file:</span>
+<span class="kw">public enum</span> <span class="ty">RenderMode</span> {
+    FAST   (<span class="st">"Fast"</span>),
+    BALANCED(<span class="st">"Balanced"</span>),
+    QUALITY(<span class="st">"Quality"</span>);
+
+    <span class="kw">public final</span> <span class="ty">String</span> label;
+    <span class="ty">RenderMode</span>(<span class="ty">String</span> label) { <span class="kw">this</span>.label = label; }
+}</code></pre>
+
+  <h3>Examples</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigEnumEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// Simple enum with custom labels</span>
+<span class="ty">VinConfigEnumEntry</span>&lt;<span class="ty">RenderMode</span>&gt; renderMode = <span class="ty">VinConfigEnumEntry</span>
+    .&lt;<span class="ty">RenderMode</span>&gt;<span class="mt">builder</span>(<span class="st">"render_mode"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Render Mode"</span>),
+        <span class="ty">RenderMode</span>.<span class="kw">class</span>, <span class="ty">RenderMode</span>.BALANCED)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.RENDER_MODE)
+    .<span class="mt">labels</span>(mode -> <span class="ty">Component</span>.<span class="mt">literal</span>(mode.label))
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Controls rendering fidelity vs performance."</span>))
+    .<span class="mt">build</span>();
+
+<span class="cm">// Enum with different image preview per value</span>
+<span class="ty">VinConfigEnumEntry</span>&lt;<span class="ty">RenderMode</span>&gt; renderModePreview = <span class="ty">VinConfigEnumEntry</span>
+    .&lt;<span class="ty">RenderMode</span>&gt;<span class="mt">builder</span>(<span class="st">"render_mode"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Render Mode"</span>),
+        <span class="ty">RenderMode</span>.<span class="kw">class</span>, <span class="ty">RenderMode</span>.BALANCED)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.RENDER_MODE)
+    .<span class="mt">labels</span>(mode -> <span class="ty">Component</span>.<span class="mt">literal</span>(mode.label))
+    .<span class="mt">preview</span>((state, value) -> {
+        <span class="ty">String</span> img;
+        <span class="kw">switch</span> (value) {
+            <span class="kw">case</span> FAST    -> img = <span class="st">"render_fast.png"</span>;
+            <span class="kw">case</span> QUALITY -> img = <span class="st">"render_quality.png"</span>;
+            <span class="kw">default</span>      -> img = <span class="st">"render_balanced.png"</span>;
+        }
+        <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, img,
+            <span class="ty">Component</span>.<span class="mt">literal</span>(value.label),
+            <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Preview of this render mode."</span>));
+    })
+    .<span class="mt">build</span>();</code></pre>
+
+  <div class="callout tip">
+    <p>Clicking the cycle button steps <strong>forward</strong> through constants in declaration order. It wraps from the last back to the first. There is no reverse direction button — keep your enums short (2–5 values) for the best UX.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: COLOR ── -->
+<div class="page" id="p-color">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Config Entries</div>
+    <h2>Color Picker <span class="tag tag-red">VinConfigColorEntry</span></h2>
+    <p class="subtitle">Three separate RGB channel sliders with a live hex color swatch. Stores values as packed <code>int</code> (0xRRGGBB with forced full alpha).</p>
+  </div>
+
+  <h3>Builder Parameters</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(key, title, defaultValue)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Default is an <code>int</code> color like <code>0xFF4FD1C5</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.binding(VinConfigValueBinding&lt;Integer&gt;)</span>
+      <span class="param-type">custom</span>
+      <span class="param-desc">Custom binding for the color value.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.description / .preview / .onChanged</span>
+      <span class="param-type">—</span>
+      <span class="param-desc">Same as other entry types.</span>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Alpha is forced to 0xFF.</strong> The <code>sanitize()</code> method on <code>VinConfigColorEntry</code> always applies <code>0xFF000000 | (value &amp; 0x00FFFFFF)</code>. You cannot store semi-transparent colors in a color entry — it's RGB only. For alpha, use a separate <code>VinConfigDoubleSliderEntry</code>.</p>
+  </div>
+
+  <h3>Forge Config Note</h3>
+  <p>Forge's <code>ForgeConfigSpec</code> has no native color type, so use <code>IntValue</code> with range <code>0x000000</code> to <code>0xFFFFFF</code>:</p>
+  <pre><span class="pre-label">Java — ForgeConfigSpec</span><code><span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// In your config spec builder:</span>
+ACCENT_COLOR = builder.<span class="mt">defineInRange</span>(<span class="st">"accent_color"</span>, <span class="nu">0x4FD1C5</span>, <span class="nu">0x000000</span>, <span class="nu">0xFFFFFF</span>);</code></pre>
+
+  <pre><span class="pre-label">Java — VinConfig Entry</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigColorEntry;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="ty">VinConfigColorEntry</span> accentColor = <span class="ty">VinConfigColorEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"accent_color"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Accent Color"</span>), <span class="nu">0xFF4FD1C5</span>)
+    .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.ACCENT_COLOR))
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Used for borders, sliders, and tabs."</span>))
+    .<span class="mt">build</span>();</code></pre>
+
+  <h3>Reading the Color Value</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">// In a preview lambda or onChanged callback:</span>
+<span class="kw">int</span> color = state.<span class="mt">get</span>(accentColor);  <span class="cm">// e.g. 0xFF4FD1C5</span>
+<span class="kw">int</span> red   = (color >> <span class="nu">16</span>) & <span class="nu">0xFF</span>;
+<span class="kw">int</span> green = (color >>  <span class="nu">8</span>) & <span class="nu">0xFF</span>;
+<span class="kw">int</span> blue  =  color        & <span class="nu">0xFF</span>;</code></pre>
+
+  <h3>Use with Live Theme</h3>
+  <p>Color entries are perfect for live-theming — let users change the accent or background colors and see them update in real time. See the <strong>Live Theme</strong> page for the full pattern.</p>
+
+</div>
+</div>
+
+<!-- ── PAGE: ACTION ── -->
+<div class="page" id="p-action">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Config Entries</div>
+    <h2>Action Button <span class="tag tag-red">VinConfigActionEntry</span></h2>
+    <p class="subtitle">A clickable button in a settings row. Use for running one-shot actions: clearing caches, sending test messages, resetting specific sub-systems, etc.</p>
+  </div>
+
+  <h3>Builder Parameters</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">builder(key, title, buttonTitle)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc"><code>title</code> = row title text. <code>buttonTitle</code> = label on the button itself.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.description(component)</span>
+      <span class="param-type">Component</span>
+      <span class="param-desc">Row subtitle / tooltip.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.onPress((state, ignored) → …)</span>
+      <span class="param-type">BiConsumer</span>
+      <span class="param-desc">Called when the button is clicked. The second argument is always <code>false</code> — ignore it. Use <code>state</code> to read current working values.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">.preview(…)</span>
+      <span class="param-type">BiFunction</span>
+      <span class="param-desc">Preview shown when this row is hovered (second arg always <code>false</code>).</span>
+    </div>
+  </div>
+
+  <div class="callout note">
+    <p><code>VinConfigActionEntry</code> extends <code>VinConfigEntry&lt;Boolean&gt;</code> internally and is bound to a standalone <code>false</code> value. The boolean state has no meaningful value — only the <code>onPress</code> callback matters.</p>
+  </div>
+
+  <h3>Examples</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigActionEntry;</span>
+<span class="cm">import net.minecraft.client.Minecraft;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="cm">// Send a test notification</span>
+<span class="ty">VinConfigActionEntry</span> testNotify = <span class="ty">VinConfigActionEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"test_notify"</span>,
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Test Notification"</span>),
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Send Test"</span>))
+    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Fires a test notification to verify settings."</span>))
+    .<span class="mt">onPress</span>((state, ignored) -> {
+        <span class="ty">Minecraft</span> mc = <span class="ty">Minecraft</span>.<span class="mt">getInstance</span>();
+        <span class="kw">if</span> (mc.player != <span class="kw">null</span>) {
+            mc.player.<span class="mt">displayClientMessage</span>(
+                <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">" Notification system works!"</span>), <span class="kw">true</span>);
+        }
+    })
+    .<span class="mt">build</span>();
+
+<span class="cm">// Clear a cache — reads another setting from state</span>
+<span class="ty">VinConfigActionEntry</span> clearCache = <span class="ty">VinConfigActionEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"clear_cache"</span>,
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Clear Cache"</span>),
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Clear Now"</span>))
+    .<span class="mt">onPress</span>((state, ignored) -> {
+        <span class="kw">boolean</span> verbose = state.<span class="mt">get</span>(verboseLogging);  <span class="cm">// read other entry</span>
+        <span class="ty">MyCacheManager</span>.<span class="mt">clear</span>(verbose);
+    })
+    .<span class="mt">build</span>();</code></pre>
+
+</div>
+</div>
+
+<!-- ── PAGE: BINDINGS ── -->
+<div class="page" id="p-bindings">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Bindings</div>
+    <h2>Value Bindings</h2>
+    <p class="subtitle"><code>VinConfigValueBinding&lt;T&gt;</code> is the bridge between VinConfig's working state and wherever your values actually live (Forge config, memory, a database, etc.).</p>
+  </div>
+
+  <h3>The Interface</h3>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigValueBinding;</span>
+
+<span class="kw">public interface</span> <span class="ty">VinConfigValueBinding</span>&lt;<span class="ty">T</span>&gt; {
+    <span class="ty">T</span>    <span class="mt">get</span>();            <span class="cm">// read the current stored value</span>
+    <span class="kw">void</span> <span class="mt">set</span>(<span class="ty">T</span> value);     <span class="cm">// write a new value to the store</span>
+    <span class="ty">T</span>    <span class="mt">defaultValue</span>();   <span class="cm">// return the default (for Reset)</span>
+    <span class="kw">void</span> <span class="mt">save</span>();           <span class="cm">// persist to disk (called during Save)</span>
+}</code></pre>
+
+  <h3>Built-in Factories — VinConfigBindings</h3>
+
+  <h4>forge() — ForgeConfigSpec direct binding</h4>
+  <p>Handles all standard Forge value types. The most common way to bind entries.</p>
+  <pre><span class="pre-label">Java — Example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// Boolean</span>
+<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.SHOW_HUD)
+
+<span class="cm">// Integer</span>
+<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.HUD_SCALE)
+
+<span class="cm">// Double</span>
+<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.OPACITY)
+
+<span class="cm">// Enum</span>
+<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.RENDER_MODE)
+
+<span class="cm">// String</span>
+<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.HERO_TITLE)</code></pre>
+
+  <h4>standalone() — in-memory only</h4>
+  <p>Stores the value in a local field. Nothing is persisted — useful for temporary UI state, demo entries, or when you manage persistence yourself.</p>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigValueBinding;</span>
+
+<span class="ty">VinConfigValueBinding</span>&lt;<span class="ty">Boolean</span>&gt; temp = <span class="ty">VinConfigBindings</span>.<span class="mt">standalone</span>(<span class="kw">false</span>);
+<span class="ty">VinConfigValueBinding</span>&lt;<span class="ty">String</span>&gt;  label = <span class="ty">VinConfigBindings</span>.<span class="mt">standalone</span>(<span class="st">"Hello"</span>);</code></pre>
+
+  <h4>of() — fully custom</h4>
+  <p>Build any binding from four lambdas. Most flexible option.</p>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigValueBinding;</span>
+
+<span class="ty">VinConfigValueBinding</span>&lt;<span class="ty">Integer</span>&gt; binding = <span class="ty">VinConfigBindings</span>.<span class="mt">of</span>(
+    () -> <span class="ty">MyStore</span>.<span class="mt">getVolume</span>(),          <span class="cm">// getter</span>
+    v  -> <span class="ty">MyStore</span>.<span class="mt">setVolume</span>(v),         <span class="cm">// setter</span>
+    ()  -> <span class="nu">80</span>,                           <span class="cm">// default supplier</span>
+    ()  -> <span class="ty">MyStore</span>.<span class="mt">flush</span>()              <span class="cm">// saver</span>
+);</code></pre>
+
+  <h4>mapped() — transform types</h4>
+  <p>Forge stores a raw type, but your entry needs a different type? Map it bidirectionally.</p>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigValueBinding;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// Store color as hex String in Forge, expose as int in VinConfig</span>
+<span class="ty">VinConfigValueBinding</span>&lt;<span class="ty">Integer</span>&gt; colorBinding = <span class="ty">VinConfigBindings</span>.<span class="mt">mapped</span>(
+    <span class="ty">MyConfig</span>.COLOR_HEX,                              <span class="cm">// ForgeConfigSpec.ConfigValue&lt;String&gt;</span>
+    hex -> <span class="ty">Integer</span>.<span class="mt">parseUnsignedInt</span>(hex, <span class="nu">16</span>),         <span class="cm">// String → int reader</span>
+    color -> <span class="ty">String</span>.<span class="mt">format</span>(<span class="st">"%06X"</span>, color & <span class="nu">0xFFFFFF</span>) <span class="cm">// int → String writer</span>
+);</code></pre>
+
+  <div class="callout tip">
+    <p><code>mapped()</code> uses <code>ForgeConfigSpec.ConfigValue&lt;S&gt;</code> as the source, so <code>save()</code> still calls the Forge value's <code>save()</code> internally. You get full TOML persistence with custom types for free.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: CUSTOM BINDING ── -->
+<div class="page" id="p-custom-binding">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Bindings</div>
+    <h2>Custom Bindings</h2>
+    <p class="subtitle">Implementing <code>VinConfigValueBinding&lt;T&gt;</code> directly for advanced use cases.</p>
+  </div>
+
+  <h3>Full Custom Implementation</h3>
+  <p>Implement the interface anonymously or as a class for complete control. This example uses a <code>Properties</code> file as the backing store:</p>
+
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigValueBinding;</span>
+<span class="cm">import java.io.IOException;</span>
+<span class="cm">import java.nio.file.Files;</span>
+<span class="cm">import java.nio.file.Path;</span>
+<span class="cm">import java.util.Properties;</span>
+
+<span class="kw">public class</span> <span class="ty">PropertiesBinding</span> <span class="kw">implements</span> <span class="ty">VinConfigValueBinding</span>&lt;<span class="ty">String</span>&gt; {
+    <span class="kw">private final</span> <span class="ty">Properties</span> props;
+    <span class="kw">private final</span> <span class="ty">String</span> propKey;
+    <span class="kw">private final</span> <span class="ty">String</span> defaultVal;
+    <span class="kw">private final</span> <span class="ty">Path</span>  filePath;
+
+    <span class="kw">public</span> <span class="ty">PropertiesBinding</span>(<span class="ty">Properties</span> props, <span class="ty">String</span> key, <span class="ty">String</span> def, <span class="ty">Path</span> path) {
+        <span class="kw">this</span>.props = props; <span class="kw">this</span>.propKey = key;
+        <span class="kw">this</span>.defaultVal = def; <span class="kw">this</span>.filePath = path;
+    }
+
+    <span class="an">@Override</span> <span class="kw">public</span> <span class="ty">String</span> <span class="mt">get</span>() {
+        <span class="kw">return</span> props.<span class="mt">getProperty</span>(propKey, defaultVal);
+    }
+    <span class="an">@Override</span> <span class="kw">public void</span> <span class="mt">set</span>(<span class="ty">String</span> value) {
+        props.<span class="mt">setProperty</span>(propKey, value);
+    }
+    <span class="an">@Override</span> <span class="kw">public</span> <span class="ty">String</span> <span class="mt">defaultValue</span>() {
+        <span class="kw">return</span> defaultVal;
+    }
+    <span class="an">@Override</span> <span class="kw">public void</span> <span class="mt">save</span>() {
+        <span class="kw">try</span> (<span class="kw">var</span> out = <span class="ty">Files</span>.<span class="mt">newOutputStream</span>(filePath)) {
+            props.<span class="mt">store</span>(out, <span class="kw">null</span>);
+        } <span class="kw">catch</span> (<span class="ty">IOException</span> e) { <span class="cm">/* handle */</span> }
+    }
+}</code></pre>
+
+  <h3>Standalone + Manual Save Pattern</h3>
+  <p>If you use <code>standalone()</code> but still want to persist via your own mechanism, attach an <code>onChanged</code> callback to trigger saves, or override <code>save()</code> in your binding:</p>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="ty">VinConfigBooleanEntry</span> myFlag = <span class="ty">VinConfigBooleanEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"flag"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Feature Flag"</span>), <span class="kw">false</span>)
+    .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">of</span>(
+        <span class="ty">MyStore</span>::<span class="mt">getFlag</span>,
+        <span class="ty">MyStore</span>::<span class="mt">setFlag</span>,
+        () -> <span class="kw">false</span>,
+        <span class="ty">MyStore</span>::<span class="mt">persist</span>
+    ))
+    .<span class="mt">build</span>();</code></pre>
+
+</div>
+</div>
+
+<!-- ── PAGE: PREVIEW ── -->
+<div class="page" id="p-preview">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">UI & Visuals</div>
+    <h2>Preview Panel</h2>
+    <p class="subtitle">Show a texture image with title and description in the right-side panel whenever the user hovers an entry row.</p>
+  </div>
+
+  <h3>How it works</h3>
+  <p>Every <code>VinConfigEntry</code> can declare a <code>previewFactory</code>. When the user hovers (or focuses) that entry's row, the screen calls the factory with the current <code>VinConfigState</code> and value, then renders the returned <code>VinConfigPreview</code> in the right panel.</p>
+  <p>If the preview has no image (<code>image == null</code>), the panel is hidden entirely — it only appears when there's actually something to show.</p>
+
+  <h3>VinConfigPreview Factory Methods</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Factory Method</span><span>Returns</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">VinConfigPreview.none()</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">No preview. The panel disappears. This is the default for all entries.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">VinConfigPreview.image(location, title, desc)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Show an image at an explicit <code>ResourceLocation</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">VinConfigPreview.configPic(modId, path, title, desc)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Convenience: prepends <code>configpic/</code> to path if missing, then calls <code>image()</code>.</span>
+    </div>
+  </div>
+
+  <h3>Image Location Convention</h3>
+  <p>Use <code>configPic(modId, "filename.png", …)</code> — it resolves to:</p>
+  <pre><span class="pre-label">Path</span><code>assets/<span class="st">yourmod</span>/configpic/<span class="st">filename.png</span></code></pre>
+  <p>In your mod's resources directory:</p>
+  <pre><span class="pre-label">Directory structure</span><code>src/main/resources/
+  assets/
+    yourmod/
+      configpic/
+        rt_on.png
+        rt_off.png
+        quality_low.png
+        quality_high.png
+        ...</code></pre>
+
+  <h3>Conditional Image (Value-Reactive Preview)</h3>
+  <p>The <code>previewFactory</code> receives the <strong>current live value</strong> from the working state, so you can switch images dynamically:</p>
+  <pre><span class="pre-label">Java — Boolean toggle switching images</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+.<span class="mt">preview</span>((state, value) -> {
+    <span class="ty">String</span> img = value ? <span class="st">"enabled.png"</span> : <span class="st">"disabled.png"</span>;
+    <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, img,
+        <span class="ty">Component</span>.<span class="mt">literal</span>(value ? <span class="st">"Enabled"</span> : <span class="st">"Disabled"</span>),
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"See the visual difference."</span>));
+})</code></pre>
+
+  <pre><span class="pre-label">Java — Enum cycle switching images</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+.<span class="mt">preview</span>((state, value) -> <span class="kw">switch</span> (value) {
+    <span class="kw">case</span> DAY   -> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, <span class="st">"time_day.png"</span>,
+                     <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Day"</span>), <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Bright daytime sky."</span>));
+    <span class="kw">case</span> NIGHT -> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, <span class="st">"time_night.png"</span>,
+                     <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Night"</span>), <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Stars visible."</span>));
+    <span class="kw">default</span>    -> <span class="ty">VinConfigPreview</span>.<span class="mt">none</span>();
+})</code></pre>
+
+  <pre><span class="pre-label">Java — Slider showing quality images (multi-image)</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraft.util.Mth;</span>
+
+.<span class="mt">preview</span>((state, value) -> {
+    <span class="ty">String</span>[] imgs = { <span class="st">"q1.png"</span>, <span class="st">"q2.png"</span>, <span class="st">"q3.png"</span>, <span class="st">"q4.png"</span> };
+    <span class="kw">int</span> idx = <span class="ty">Mth</span>.<span class="mt">clamp</span>(value - <span class="nu">1</span>, <span class="nu">0</span>, <span class="nu">3</span>);
+    <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, imgs[idx],
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Quality "</span> + value),
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Higher values use more GPU."</span>));
+})</code></pre>
+
+  <h3>Cross-entry Previews (Reading Other Values)</h3>
+  <p>The factory receives the entire <code>VinConfigState</code>, not just the entry's own value. You can read any other entry:</p>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="cm">// Show different image based on ANOTHER entry's value</span>
+.<span class="mt">preview</span>((state, value) -> {
+    <span class="kw">boolean</span> rtxOn = state.<span class="mt">get</span>(rtxEnabledEntry);
+    <span class="kw">int</span>     quality = state.<span class="mt">get</span>(qualityEntry);
+    <span class="ty">String</span>  img = rtxOn ? <span class="st">"rtx_q"</span> + quality + <span class="st">".png"</span> : <span class="st">"std_q"</span> + quality + <span class="st">".png"</span>;
+    <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, img,
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Combined preview"</span>),
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"RTX "</span> + (rtxOn ? <span class="st">"ON"</span> : <span class="st">"OFF"</span>) + <span class="st">", Q"</span> + quality));
+})</code></pre>
+
+  <div class="callout tip">
+    <p>The preview fades in with a smooth animation when switching between entries. The image is drawn with alpha from 0.35 → 1.0 during the fade. A colored accent bar grows in at the bottom of the panel simultaneously.</p>
+  </div>
+
+  <h3>Recommended Image Specs</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Property</th><th>Recommendation</th></tr></thead>
+    <tbody>
+      <tr><td>Format</td><td>PNG (with or without transparency)</td></tr>
+      <tr><td>Aspect ratio</td><td>16:9 or any — VinConfig stretches to fill the preview box</td></tr>
+      <tr><td>Size</td><td>256×144 or 512×288 — small enough to load fast</td></tr>
+      <tr><td>Location</td><td><code>assets/yourmod/configpic/name.png</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: THEME ── -->
+<div class="page" id="p-theme">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">UI & Visuals</div>
+    <h2>Theming</h2>
+    <p class="subtitle">Control every color in the config screen with a <code>VinConfigTheme</code> record. Swap the entire palette in one call.</p>
+  </div>
+
+  <h3>VinConfigTheme Fields</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Field</th><th>Used For</th><th>Default (darkCinema)</th></tr></thead>
+    <tbody>
+      <tr><td><code>backgroundTop</code></td><td>Top gradient color of the full-screen backdrop</td><td><code>0xFF111827</code></td></tr>
+      <tr><td><code>backgroundBottom</code></td><td>Bottom gradient color of the backdrop</td><td><code>0xFF1F2937</code></td></tr>
+      <tr><td><code>panel</code></td><td>Main content panel background</td><td><code>0xD91A2233</code></td></tr>
+      <tr><td><code>panelSoft</code></td><td>Tab sidebar and content area inset</td><td><code>0xCC0F172A</code></td></tr>
+      <tr><td><code>panelStrong</code></td><td>Preview panel, hovered rows, button backgrounds</td><td><code>0xEE111827</code></td></tr>
+      <tr><td><code>accent</code></td><td>Active tab, slider fill, scroll knob, outlines, focus ring</td><td><code>0xFF4FD1C5</code></td></tr>
+      <tr><td><code>textPrimary</code></td><td>Titles, button labels, values</td><td><code>0xFFF8FAFC</code></td></tr>
+      <tr><td><code>textSecondary</code></td><td>Descriptions, subtitles, slider channel labels</td><td><code>0xFFCBD5E1</code></td></tr>
+      <tr><td><code>outline</code></td><td>Panel border, widget outlines</td><td><code>0x66FFFFFF</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout note">
+    <p>Colors are <strong>ARGB integers</strong>: the upper byte is alpha, then red, green, blue. E.g. <code>0xCC0F172A</code> has alpha = 0xCC ≈ 80% opacity, and RGB = <code>#0F172A</code>.</p>
+  </div>
+
+  <h3>Using the Built-in Dark Cinema Theme</h3>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigDefinition;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigTheme;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="ty">VinConfigDefinition</span>.<span class="mt">builder</span>(<span class="st">"yourmod"</span>, title)
+    .<span class="mt">theme</span>(<span class="ty">VinConfigTheme</span>.<span class="mt">darkCinema</span>())  <span class="cm">// built-in default</span>
+    ...</code></pre>
+
+  <h3>Building a Custom Theme</h3>
+  <pre><span class="pre-label">Java — Warm amber theme</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigDefinition;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigTheme;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="ty">VinConfigTheme</span> warmTheme = <span class="ty">VinConfigTheme</span>.<span class="mt">builder</span>()
+    .<span class="mt">backgroundTop</span>    (<span class="nu">0xFF1C1100</span>)
+    .<span class="mt">backgroundBottom</span> (<span class="nu">0xFF2D1B00</span>)
+    .<span class="mt">panel</span>            (<span class="nu">0xD9201800</span>)
+    .<span class="mt">panelSoft</span>        (<span class="nu">0xCC180E00</span>)
+    .<span class="mt">panelStrong</span>      (<span class="nu">0xEE1A1000</span>)
+    .<span class="mt">accent</span>           (<span class="nu">0xFFFFB454</span>)  <span class="cm">// warm amber accent</span>
+    .<span class="mt">textPrimary</span>      (<span class="nu">0xFFFFF8EC</span>)
+    .<span class="mt">textSecondary</span>    (<span class="nu">0xFFD4B896</span>)
+    .<span class="mt">outline</span>          (<span class="nu">0x55FFFFFF</span>)
+    .<span class="mt">build</span>();
+
+<span class="ty">VinConfigDefinition</span>.<span class="mt">builder</span>(<span class="st">"yourmod"</span>, title)
+    .<span class="mt">theme</span>(warmTheme)
+    ...</code></pre>
+
+  <pre><span class="pre-label">Java — Clean light theme</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigTheme;</span>
+
+<span class="ty">VinConfigTheme</span> lightTheme = <span class="ty">VinConfigTheme</span>.<span class="mt">builder</span>()
+    .<span class="mt">backgroundTop</span>    (<span class="nu">0xFFF0F4FF</span>)
+    .<span class="mt">backgroundBottom</span> (<span class="nu">0xFFE2E8F0</span>)
+    .<span class="mt">panel</span>            (<span class="nu">0xF0FFFFFF</span>)
+    .<span class="mt">panelSoft</span>        (<span class="nu">0xE8F8FAFC</span>)
+    .<span class="mt">panelStrong</span>      (<span class="nu">0xF8FFFFFF</span>)
+    .<span class="mt">accent</span>           (<span class="nu">0xFF6366F1</span>)  <span class="cm">// indigo accent</span>
+    .<span class="mt">textPrimary</span>      (<span class="nu">0xFF1E293B</span>)
+    .<span class="mt">textSecondary</span>    (<span class="nu">0xFF475569</span>)
+    .<span class="mt">outline</span>          (<span class="nu">0x22000000</span>)
+    .<span class="mt">build</span>();</code></pre>
+
+</div>
+</div>
+
+<!-- ── PAGE: LIVE THEME ── -->
+<div class="page" id="p-live-theme">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">UI & Visuals</div>
+    <h2>Live Theme</h2>
+    <p class="subtitle">Make the config screen re-theme itself in real time as the user changes color entries — no save required.</p>
+  </div>
+
+  <h3>How it works</h3>
+  <p>Instead of <code>.theme(staticTheme)</code>, call <code>.liveTheme(state -> VinConfigTheme)</code>. On every render frame, the screen calls this function with the current <strong>working state</strong> (unsaved changes included) and uses the returned theme to paint everything.</p>
+
+  <pre><span class="pre-label">Java — Full live theme example</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigCategory;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigColorEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigDefinition;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigTheme;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="cm">// Define color entries first</span>
+<span class="ty">VinConfigColorEntry</span> bgTop = <span class="ty">VinConfigColorEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"bg_top"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Top Color"</span>), <span class="nu">0xFF0F172A</span>)
+    .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.BG_TOP))
+    .<span class="mt">build</span>();
+
+<span class="ty">VinConfigColorEntry</span> bgBottom = <span class="ty">VinConfigColorEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"bg_bottom"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Bottom Color"</span>), <span class="nu">0xFF1E293B</span>)
+    .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.BG_BOTTOM))
+    .<span class="mt">build</span>();
+
+<span class="ty">VinConfigColorEntry</span> accent = <span class="ty">VinConfigColorEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"accent"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Accent Color"</span>), <span class="nu">0xFFFFB454</span>)
+    .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">MyConfig</span>.ACCENT))
+    .<span class="mt">build</span>();
+
+<span class="cm">// Then wire them into liveTheme</span>
+<span class="ty">VinConfigDefinition</span> def = <span class="ty">VinConfigDefinition</span>
+    .<span class="mt">builder</span>(<span class="st">"yourmod"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"My Mod"</span>))
+    <span class="cm">// Static fallback used before entries are loaded:</span>
+    .<span class="mt">theme</span>(<span class="ty">VinConfigTheme</span>.<span class="mt">darkCinema</span>())
+    <span class="cm">// Live function re-runs every frame:</span>
+    .<span class="mt">liveTheme</span>(state -> <span class="ty">VinConfigTheme</span>.<span class="mt">builder</span>()
+        .<span class="mt">backgroundTop</span>   (state.<span class="mt">get</span>(bgTop))
+        .<span class="mt">backgroundBottom</span>(state.<span class="mt">get</span>(bgBottom))
+        .<span class="mt">panel</span>           (<span class="nu">0xD9172434</span>)
+        .<span class="mt">panelSoft</span>       (<span class="nu">0xC9111825</span>)
+        .<span class="mt">panelStrong</span>     (<span class="nu">0xEE0B1120</span>)
+        .<span class="mt">accent</span>          (state.<span class="mt">get</span>(accent))
+        .<span class="mt">textPrimary</span>     (<span class="nu">0xFFF8FAFC</span>)
+        .<span class="mt">textSecondary</span>   (<span class="nu">0xFFCBD5E1</span>)
+        .<span class="mt">outline</span>         (<span class="nu">0x66FFFFFF</span>)
+        .<span class="mt">build</span>())
+    .<span class="mt">category</span>(
+        <span class="ty">VinConfigCategory</span>.<span class="mt">builder</span>(<span class="st">"colors"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Colors"</span>))
+            .<span class="mt">entry</span>(bgTop)
+            .<span class="mt">entry</span>(bgBottom)
+            .<span class="mt">entry</span>(accent)
+            .<span class="mt">build</span>()
+    )
+    .<span class="mt">build</span>();</code></pre>
+
+  <div class="callout tip">
+    <p>The live theme function runs on every render frame. Keep it lightweight — just reading state values and constructing a theme record is perfectly fine. Avoid heavy computation inside it.</p>
+  </div>
+
+  <div class="callout note">
+    <p>Calling <code>.theme()</code> after <code>.liveTheme()</code> (or vice versa) overwrites the previous setting. The <em>last</em> one set wins. If you call both, put <code>.theme()</code> first as a static fallback, then <code>.liveTheme()</code> to override it.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: BACKGROUND ── -->
+<div class="page" id="p-background">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">UI & Visuals</div>
+    <h2>Background Renderer</h2>
+    <p class="subtitle">Inject arbitrary rendering behind the gradient backdrop — particles, scrolling textures, animated patterns, anything.</p>
+  </div>
+
+  <h3>The Interface</h3>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBackgroundRenderer;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigTheme;</span>
+<span class="cm">import net.minecraft.client.gui.GuiGraphics;</span>
+
+<span class="an">@FunctionalInterface</span>
+<span class="kw">public interface</span> <span class="ty">VinConfigBackgroundRenderer</span> {
+    <span class="kw">void</span> <span class="mt">render</span>(
+        <span class="ty">GuiGraphics</span> graphics,
+        <span class="kw">int</span> width,
+        <span class="kw">int</span> height,
+        <span class="ty">VinConfigTheme</span> theme,
+        <span class="kw">int</span> mouseX,
+        <span class="kw">int</span> mouseY,
+        <span class="kw">float</span> partialTick
+    );
+}</code></pre>
+
+  <p>The renderer runs <strong>before</strong> the gradient fill and panel drawing. This means your custom background appears underneath everything.</p>
+
+  <h3>Examples</h3>
+  <pre><span class="pre-label">Java — Tiled texture background</span><code><span class="cm">import net.minecraft.client.gui.GuiGraphics;</span>
+<span class="cm">import net.minecraft.resources.ResourceLocation;</span>
+
+.<span class="mt">background</span>((graphics, w, h, theme, mouseX, mouseY, tick) -> {
+    <span class="ty">ResourceLocation</span> tex = <span class="ty">ResourceLocation</span>.<span class="mt">fromNamespaceAndPath</span>(<span class="st">"yourmod"</span>, <span class="st">"textures/gui/bg_tile.png"</span>);
+    <span class="kw">for</span> (<span class="kw">int</span> x = <span class="nu">0</span>; x < w; x += <span class="nu">64</span>) {
+        <span class="kw">for</span> (<span class="kw">int</span> y = <span class="nu">0</span>; y < h; y += <span class="nu">64</span>) {
+            graphics.<span class="mt">blit</span>(tex, x, y, <span class="nu">0</span>, <span class="nu">0</span>, <span class="nu">64</span>, <span class="nu">64</span>, <span class="nu">64</span>, <span class="nu">64</span>);
+        }
+    }
+})</code></pre>
+
+  <pre><span class="pre-label">Java — Scrolling star field effect</span><code><span class="cm">import net.minecraft.Util;</span>
+<span class="cm">import net.minecraft.client.gui.GuiGraphics;</span>
+<span class="cm">import java.util.Random;</span>
+
+<span class="kw">private static long</span> bgStart = <span class="ty">Util</span>.<span class="mt">getMillis</span>();
+
+<span class="cm">// In definition builder:</span>
+.<span class="mt">background</span>((graphics, w, h, theme, mouseX, mouseY, tick) -> {
+    <span class="kw">float</span> t = ((<span class="ty">Util</span>.<span class="mt">getMillis</span>() - bgStart) / <span class="nu">60000.0f</span>) % <span class="nu">1.0f</span>;
+    <span class="ty">Random</span> rng = <span class="kw">new</span> <span class="ty">Random</span>(<span class="nu">42</span>);
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i < <span class="nu">80</span>; i++) {
+        <span class="kw">int</span> sx = (<span class="kw">int</span>)((rng.<span class="mt">nextFloat</span>() * w + t * w * <span class="nu">0.3f</span>) % w);
+        <span class="kw">int</span> sy = (<span class="kw">int</span>)(rng.<span class="mt">nextFloat</span>() * h);
+        <span class="kw">int</span> size = rng.<span class="mt">nextInt</span>(<span class="nu">3</span>) + <span class="nu">1</span>;
+        graphics.<span class="mt">fill</span>(sx, sy, sx + size, sy + size, <span class="nu">0x44FFFFFF</span>);
+    }
+})</code></pre>
+
+  <pre><span class="pre-label">Java — Accent-colored particle drift using theme color</span><code><span class="cm">import net.minecraft.Util;</span>
+<span class="cm">import net.minecraft.client.gui.GuiGraphics;</span>
+<span class="cm">import java.util.Random;</span>
+
+.<span class="mt">background</span>((graphics, w, h, theme, mouseX, mouseY, tick) -> {
+    <span class="kw">long</span> ms = <span class="ty">Util</span>.<span class="mt">getMillis</span>();
+    <span class="ty">Random</span> rng = <span class="kw">new</span> <span class="ty">Random</span>(<span class="nu">7</span>);
+    <span class="kw">int</span> accent = (theme.<span class="mt">accent</span>() & <span class="nu">0x00FFFFFF</span>) | <span class="nu">0x18000000</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i < <span class="nu">40</span>; i++) {
+        <span class="kw">float</span> speed = rng.<span class="mt">nextFloat</span>() * <span class="nu">20f</span> + <span class="nu">5f</span>;
+        <span class="kw">int</span> px = (<span class="kw">int</span>)(rng.<span class="mt">nextFloat</span>() * w);
+        <span class="kw">int</span> py = (<span class="kw">int</span>)((rng.<span class="mt">nextFloat</span>() * h - ms / speed) % h + h) % h;
+        graphics.<span class="mt">fill</span>(px, py, px + <span class="nu">2</span>, py + <span class="nu">6</span>, accent);
+    }
+})</code></pre>
+
+  <div class="callout note">
+    <p>The background renderer receives the <strong>live theme</strong>, so if you use <code>liveTheme()</code>, your background can react to the user's color choices in real time.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: STATE ── -->
+<div class="page" id="p-state">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Advanced</div>
+    <h2>Config State</h2>
+    <p class="subtitle"><code>VinConfigState</code> is the working copy of all config values while the screen is open. Changes are only written to bindings when the user saves.</p>
+  </div>
+
+  <h3>State Lifecycle</h3>
+  <ol class="step-list">
+    <li>
+      <div>
+        <strong>Screen opens → state loaded</strong>
+        <p><code>VinConfigState.load(definition)</code> calls <code>readBoundValue()</code> on every entry, building an in-memory map of the current saved values.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>User edits → working state updated</strong>
+        <p>Each widget calls <code>state.set(entry, newValue)</code>. This only updates the in-memory map and fires <code>onChanged</code> callbacks.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>User saves → written to bindings</strong>
+        <p><code>state.save()</code> calls <code>writeBoundValue(get(entry))</code> then <code>saveBoundValue()</code> for every entry, then flushes TOML via <code>VinConfigTomlPersistence</code>.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>User closes without saving → changes discarded</strong>
+        <p>The working state is garbage collected. Bindings are unchanged.</p>
+      </div>
+    </li>
+  </ol>
+
+  <h3>VinConfigState API</h3>
+  <div class="param-table">
+    <div class="param-row param-header"><span>Method</span><span>Type</span><span>Description</span></div>
+    <div class="param-row">
+      <span class="param-name">VinConfigState.load(def)</span>
+      <span class="param-type">static</span>
+      <span class="param-desc">Create a fresh state from the definition's current binding values.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.get(entry)</span>
+      <span class="param-type">T</span>
+      <span class="param-desc">Read a working value. If the key is missing, falls back to <code>entry.defaultValue()</code> and caches it.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.set(entry, value)</span>
+      <span class="param-type">void</span>
+      <span class="param-desc">Write a working value. Sanitizes the value and fires <code>onChanged</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.reset(entry)</span>
+      <span class="param-type">void</span>
+      <span class="param-desc">Revert a single entry to its <code>defaultValue()</code>.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.reset(category)</span>
+      <span class="param-type">void</span>
+      <span class="param-desc">Revert all entries in a category.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.resetAll()</span>
+      <span class="param-type">void</span>
+      <span class="param-desc">Revert every entry across all categories.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.save()</span>
+      <span class="param-type">void</span>
+      <span class="param-desc">Write all working values to bindings and flush to disk.</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.copy()</span>
+      <span class="param-type">VinConfigState</span>
+      <span class="param-desc">Shallow copy of the value map (used internally to create the "stored" snapshot).</span>
+    </div>
+    <div class="param-row">
+      <span class="param-name">state.definition()</span>
+      <span class="param-type">VinConfigDefinition</span>
+      <span class="param-desc">Access the definition this state belongs to.</span>
+    </div>
+  </div>
+
+  <h3>Using State in Callbacks</h3>
+  <pre><span class="pre-label">Java — Reading other entries inside preview or onChanged</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="ty">VinConfigBooleanEntry</span> showHud   = <span class="cm">/* ... */</span>;
+<span class="ty">VinConfigIntSliderEntry</span> hudScale = <span class="cm">/* ... */</span>;
+
+<span class="ty">VinConfigBooleanEntry</span> testEntry = <span class="ty">VinConfigBooleanEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"test"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Test"</span>), <span class="kw">false</span>)
+    .<span class="mt">preview</span>((state, value) -> {
+        <span class="kw">boolean</span> hud = state.<span class="mt">get</span>(showHud);    <span class="cm">// read sibling entry</span>
+        <span class="kw">int</span>     scale = state.<span class="mt">get</span>(hudScale); <span class="cm">// read another entry</span>
+        <span class="ty">String</span>  img = hud ? <span class="st">"hud_on_"</span> + scale + <span class="st">".png"</span> : <span class="st">"hud_off.png"</span>;
+        <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, img,
+            <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"HUD preview"</span>),
+            <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Scale: "</span> + scale + <span class="st">"%"</span>));
+    })
+    .<span class="mt">build</span>();</code></pre>
+
+</div>
+</div>
+
+<!-- ── PAGE: PERSISTENCE ── -->
+<div class="page" id="p-persistence">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Advanced</div>
+    <h2>Persistence & TOML</h2>
+    <p class="subtitle">How VinConfig saves your config to disk after the user clicks Save.</p>
+  </div>
+
+  <h3>The Save Flow</h3>
+  <p>When the user presses Save (or <kbd>Ctrl+S</kbd>), <code>VinConfigState.save()</code> runs this sequence for every entry:</p>
+  <ol class="step-list">
+    <li>
+      <div>
+        <strong>Write value to binding</strong>
+        <p><code>entry.writeBoundValue(state.get(entry))</code> — calls <code>binding.set(sanitizedValue)</code>. For Forge bindings this sets the in-memory Forge config value.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>Save the binding</strong>
+        <p><code>entry.saveBoundValue()</code> — calls <code>binding.save()</code>. For Forge bindings this calls <code>ForgeConfigSpec.ConfigValue.save()</code>.</p>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>Flush TOML to disk</strong>
+        <p><code>VinConfigTomlPersistence.flushTrackedConfigs(modId)</code> iterates all <code>ModConfig</code>s registered for your mod, calls <code>config.save()</code> on each, then calls <code>config.getSpec().afterReload()</code> to fire Forge's post-reload hooks.</p>
+      </div>
+    </li>
+  </ol>
+
+  <h3>VinConfigTomlPersistence</h3>
+  <p>You can also call this utility manually if you need to force-flush configs outside of VinConfig's save flow:</p>
+  <pre><span class="pre-label">Java</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigTomlPersistence;</span>
+
+<span class="cm">// Flush all currently loaded tracked configs for this modId</span>
+<span class="ty">VinConfigTomlPersistence</span>.<span class="mt">flushTrackedConfigs</span>(<span class="st">"yourmod"</span>);</code></pre>
+
+  <p>The method is null-safe and no-ops if the modId is blank or if a config has no data loaded yet.</p>
+
+  <h3>afterReload Hook</h3>
+  <p>After flushing, VinConfig calls <code>config.getSpec().afterReload()</code>. In the current implementation this is used to refresh Forge config spec caches after the file write. VinConfig's save path does not manually post a <code>ModConfigEvent.Reloading</code> event.</p>
+
+  <h3>Custom Persistence</h3>
+  <p>If you don't use ForgeConfigSpec at all, implement the <code>save()</code> method in your <code>VinConfigValueBinding</code> to write to your own storage (file, database, network, etc.). VinConfig calls <code>save()</code> on every binding unconditionally during the save flow.</p>
+
+</div>
+</div>
+
+<!-- ── PAGE: CALLBACKS ── -->
+<div class="page" id="p-onchanged">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Advanced</div>
+    <h2>Callbacks</h2>
+    <p class="subtitle">React to value changes in real time — before the user even clicks Save.</p>
+  </div>
+
+  <h3>onChanged</h3>
+  <p>Most value entry builders accept <code>.onChanged((state, value) → …)</code>. It fires on every interaction for those entries: toggle click, slider drag, text input keystroke, or enum cycle. <code>VinConfigActionEntry</code> uses <code>.onPress((state, ignored) → …)</code> instead.</p>
+  <p>The callback receives:</p>
+  <ul style="padding-left:20px;margin-bottom:14px;line-height:2.1;">
+    <li><strong><code>VinConfigState state</code></strong> — the full working state. Read any other entry with <code>state.get(otherEntry)</code>.</li>
+    <li><strong><code>T value</code></strong> — the new (already sanitized) value for this specific entry.</li>
+  </ul>
+
+  <pre><span class="pre-label">Java — Apply change immediately to game world</span><code><span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import net.minecraft.client.Minecraft;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="ty">VinConfigBooleanEntry</span> fullbright = <span class="ty">VinConfigBooleanEntry</span>
+    .<span class="mt">builder</span>(<span class="st">"fullbright"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Fullbright"</span>), <span class="kw">false</span>)
+    .<span class="mt">forge</span>(<span class="ty">MyConfig</span>.FULLBRIGHT)
+    .<span class="mt">onChanged</span>((state, value) -> {
+        <span class="ty">Minecraft</span> mc = <span class="ty">Minecraft</span>.<span class="mt">getInstance</span>();
+        <span class="kw">if</span> (mc.level != <span class="kw">null</span>) {
+            mc.options.gamma().<span class="mt">set</span>(value ? <span class="nu">100.0</span> : <span class="nu">0.5</span>);
+            mc.<span class="mt">levelRenderer</span>.<span class="mt">allChanged</span>();
+        }
+    })
+    .<span class="mt">build</span>();</code></pre>
+
+  <pre><span class="pre-label">Java — Update multiple things from one change</span><code>.<span class="mt">onChanged</span>((state, value) -> {
+    <span class="kw">int</span> scale = state.<span class="mt">get</span>(hudScaleEntry);   <span class="cm">// read sibling value</span>
+    <span class="ty">HudRenderer</span>.<span class="mt">setVisibility</span>(value);
+    <span class="ty">HudRenderer</span>.<span class="mt">setScale</span>(scale / <span class="nu">100.0f</span>);
+})</code></pre>
+
+  <h3>preview factory</h3>
+  <p>The preview factory is also a callback — it's called every time the user hovers that row. Use it to compute which image to display based on the <em>current</em> state, not just the initial value.</p>
+
+  <pre><span class="pre-label">Java — Multi-condition preview</span><code>.<span class="mt">preview</span>((state, value) -> {
+    <span class="kw">boolean</span> shader = state.<span class="mt">get</span>(shaderEntry);
+    <span class="kw">boolean</span> rtx    = state.<span class="mt">get</span>(rtxEntry);
+    <span class="ty">String</span>  img;
+    <span class="kw">if</span>      (rtx && shader) img = <span class="st">"both.png"</span>;
+    <span class="kw">else if</span> (rtx)           img = <span class="st">"rtx_only.png"</span>;
+    <span class="kw">else if</span> (shader)        img = <span class="st">"shader_only.png"</span>;
+    <span class="kw">else</span>                    img = <span class="st">"vanilla.png"</span>;
+    <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"yourmod"</span>, img,
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Combined mode"</span>),
+        <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Result of current settings combination."</span>));
+})</code></pre>
+
+  <div class="callout warn">
+    <p><code>onChanged</code> fires on every slider <strong>drag step</strong>, not just release. For expensive operations (network calls, file I/O, level reloads), consider debouncing manually or doing the heavy work inside <code>save()</code> instead.</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ── PAGE: FULL EXAMPLE ── -->
+<div class="page" id="p-full-example">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Advanced</div>
+    <h2>Full Example</h2>
+    <p class="subtitle">A complete, production-ready config setup for a hypothetical visual mod — covering every feature in one place.</p>
+  </div>
+
+  <h3>ForgeConfigSpec</h3>
+  <pre><span class="pre-label">Java — VisualModConfig.java</span><code><span class="cm">package com.example.visualmod;</span>
+
+<span class="cm">import net.minecraftforge.common.ForgeConfigSpec;</span>
+
+<span class="kw">public final class</span> <span class="ty">VisualModConfig</span> {
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span> SPEC;
+
+    <span class="cm">// Rendering</span>
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">BooleanValue</span> RTX_ENABLED;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">EnumValue</span>&lt;<span class="ty">Quality</span>&gt; RENDER_QUALITY;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">DoubleValue</span>  BLOOM_INTENSITY;
+
+    <span class="cm">// HUD</span>
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">BooleanValue</span> SHOW_HUD;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">IntValue</span>    HUD_OPACITY;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">ConfigValue</span>&lt;<span class="ty">String</span>&gt; HUD_TITLE;
+
+    <span class="cm">// Colors</span>
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">IntValue</span>    ACCENT_COLOR;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">IntValue</span>    BG_TOP;
+    <span class="kw">public static final</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">IntValue</span>    BG_BOTTOM;
+
+    <span class="kw">static</span> {
+        <span class="ty">ForgeConfigSpec</span>.<span class="ty">Builder</span> b = <span class="kw">new</span> <span class="ty">ForgeConfigSpec</span>.<span class="ty">Builder</span>();
+
+        b.<span class="mt">push</span>(<span class="st">"rendering"</span>);
+        RTX_ENABLED     = b.<span class="mt">define</span>(<span class="st">"rtx_enabled"</span>, <span class="kw">false</span>);
+        RENDER_QUALITY  = b.<span class="mt">defineEnum</span>(<span class="st">"render_quality"</span>, <span class="ty">Quality</span>.BALANCED);
+        BLOOM_INTENSITY = b.<span class="mt">defineInRange</span>(<span class="st">"bloom_intensity"</span>, <span class="nu">0.5</span>, <span class="nu">0.0</span>, <span class="nu">2.0</span>);
+        b.<span class="mt">pop</span>();
+
+        b.<span class="mt">push</span>(<span class="st">"hud"</span>);
+        SHOW_HUD    = b.<span class="mt">define</span>(<span class="st">"show_hud"</span>, <span class="kw">true</span>);
+        HUD_OPACITY = b.<span class="mt">defineInRange</span>(<span class="st">"hud_opacity"</span>, <span class="nu">100</span>, <span class="nu">10</span>, <span class="nu">100</span>);
+        HUD_TITLE   = b.<span class="mt">define</span>(<span class="st">"hud_title"</span>, <span class="st">"Visual Mod"</span>);
+        b.<span class="mt">pop</span>();
+
+        b.<span class="mt">push</span>(<span class="st">"colors"</span>);
+        ACCENT_COLOR = b.<span class="mt">defineInRange</span>(<span class="st">"accent"</span>, <span class="nu">0xFFB454</span>, <span class="nu">0</span>, <span class="nu">0xFFFFFF</span>);
+        BG_TOP       = b.<span class="mt">defineInRange</span>(<span class="st">"bg_top"</span>, <span class="nu">0x0F172A</span>, <span class="nu">0</span>, <span class="nu">0xFFFFFF</span>);
+        BG_BOTTOM    = b.<span class="mt">defineInRange</span>(<span class="st">"bg_bottom"</span>, <span class="nu">0x1E293B</span>, <span class="nu">0</span>, <span class="nu">0xFFFFFF</span>);
+        b.<span class="mt">pop</span>();
+
+        SPEC = b.<span class="mt">build</span>();
+    }
+
+    <span class="kw">public enum</span> <span class="ty">Quality</span> {
+        LOW(<span class="st">"Low"</span>), BALANCED(<span class="st">"Balanced"</span>), HIGH(<span class="st">"High"</span>), ULTRA(<span class="st">"Ultra"</span>);
+        <span class="kw">public final</span> <span class="ty">String</span> label;
+        <span class="ty">Quality</span>(<span class="ty">String</span> label) { <span class="kw">this</span>.label = label; }
+    }
+}</code></pre>
+
+  <h3>Mod Main Class</h3>
+  <pre><span class="pre-label">Java — VisualMod.java</span><code><span class="cm">package com.example.visualmod;</span>
+
+<span class="cm">import net.minecraftforge.api.distmarker.Dist;</span>
+<span class="cm">import net.minecraftforge.fml.common.Mod;</span>
+<span class="cm">import net.minecraftforge.fml.ModLoadingContext;</span>
+<span class="cm">import net.minecraftforge.fml.config.ModConfig;</span>
+<span class="cm">import net.minecraftforge.fml.loading.FMLEnvironment;</span>
+
+<span class="an">@Mod</span>(<span class="st">"visualmod"</span>)
+<span class="kw">public final class</span> <span class="ty">VisualMod</span> {
+    <span class="kw">public static final</span> <span class="ty">String</span> MOD_ID = <span class="st">"visualmod"</span>;
+
+    <span class="kw">public</span> <span class="ty">VisualMod</span>() {
+        <span class="ty">ModLoadingContext</span>.<span class="mt">get</span>().<span class="mt">registerConfig</span>(<span class="ty">ModConfig</span>.<span class="ty">Type</span>.CLIENT, <span class="ty">VisualModConfig</span>.SPEC);
+        <span class="kw">if</span> (<span class="ty">FMLEnvironment</span>.dist == <span class="ty">Dist</span>.CLIENT) {
+            <span class="ty">VisualModClient</span>.<span class="mt">bootstrap</span>();
+        }
+    }
+}</code></pre>
+
+  <h3>Client Bootstrap with Full Definition</h3>
+  <pre><span class="pre-label">Java — VisualModClient.java</span><code><span class="cm">package com.example.visualmod.client;</span>
+
+<span class="cm">import com.example.visualmod.VisualModConfig;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigActionEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigBindings;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigCategory;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigColorEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigDefinition;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigDoubleSliderEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigEnumEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigPreview;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigTextEntry;</span>
+<span class="cm">import com.vinlanx.vinconfig.api.VinConfigTheme;</span>
+<span class="cm">import com.vinlanx.vinconfig.client.VinConfigClientApi;</span>
+<span class="cm">import net.minecraft.network.chat.Component;</span>
+
+<span class="kw">public final class</span> <span class="ty">VisualModClient</span> {
+    <span class="kw">private static boolean</span> bootstrapped;
+
+    <span class="kw">public static void</span> <span class="mt">bootstrap</span>() {
+        <span class="kw">if</span> (bootstrapped) <span class="kw">return</span>;
+        bootstrapped = <span class="kw">true</span>;
+
+        <span class="cm">// ── COLOR ENTRIES (needed for liveTheme) ──</span>
+        <span class="ty">VinConfigColorEntry</span> accentEntry = <span class="ty">VinConfigColorEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"accent"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Accent Color"</span>), <span class="nu">0xFFFFB454</span>)
+            .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.ACCENT_COLOR))
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"UI highlight color for tabs and sliders."</span>))
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigColorEntry</span> bgTopEntry = <span class="ty">VinConfigColorEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"bg_top"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Background Top"</span>), <span class="nu">0xFF0F172A</span>)
+            .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.BG_TOP))
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigColorEntry</span> bgBottomEntry = <span class="ty">VinConfigColorEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"bg_bottom"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Background Bottom"</span>), <span class="nu">0xFF1E293B</span>)
+            .<span class="mt">binding</span>(<span class="ty">VinConfigBindings</span>.<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.BG_BOTTOM))
+            .<span class="mt">build</span>();
+
+        <span class="cm">// ── RENDERING ENTRIES ──</span>
+        <span class="ty">VinConfigBooleanEntry</span> rtx = <span class="ty">VinConfigBooleanEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"rtx_enabled"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"RTX Lighting"</span>), <span class="kw">false</span>)
+            .<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.RTX_ENABLED)
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Enables ray-traced global illumination."</span>))
+            .<span class="mt">preview</span>((state, value) -> {
+                <span class="ty">String</span> img = value ? <span class="st">"rtx_on.png"</span> : <span class="st">"rtx_off.png"</span>;
+                <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"visualmod"</span>, img,
+                    <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"RTX "</span> + (value ? <span class="st">"Enabled"</span> : <span class="st">"Disabled"</span>)),
+                    <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Dramatic lighting difference when active."</span>));
+            })
+            .<span class="mt">onChanged</span>((state, value) -> <span class="ty">RenderPipeline</span>.<span class="mt">setRtx</span>(value))
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigEnumEntry</span>&lt;<span class="ty">VisualModConfig</span>.<span class="ty">Quality</span>&gt; quality = <span class="ty">VinConfigEnumEntry</span>
+            .&lt;<span class="ty">VisualModConfig</span>.<span class="ty">Quality</span>&gt;<span class="mt">builder</span>(<span class="st">"render_quality"</span>,
+                <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Render Quality"</span>),
+                <span class="ty">VisualModConfig</span>.<span class="ty">Quality</span>.<span class="kw">class</span>,
+                <span class="ty">VisualModConfig</span>.<span class="ty">Quality</span>.BALANCED)
+            .<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.RENDER_QUALITY)
+            .<span class="mt">labels</span>(q -> <span class="ty">Component</span>.<span class="mt">literal</span>(q.label))
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Affects shadow quality, AO, and reflections."</span>))
+            .<span class="mt">preview</span>((state, value) -> {
+                <span class="ty">String</span> img = <span class="st">"quality_"</span> + value.name().<span class="mt">toLowerCase</span>() + <span class="st">".png"</span>;
+                <span class="kw">return</span> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"visualmod"</span>, img,
+                    <span class="ty">Component</span>.<span class="mt">literal</span>(value.label + <span class="st">" Quality"</span>),
+                    <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Visual fidelity at this preset."</span>));
+            })
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigDoubleSliderEntry</span> bloom = <span class="ty">VinConfigDoubleSliderEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"bloom_intensity"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Bloom Intensity"</span>), <span class="nu">0.5</span>, <span class="nu">0.0</span>, <span class="nu">2.0</span>)
+            .<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.BLOOM_INTENSITY)
+            .<span class="mt">step</span>(<span class="nu">0.05</span>)
+            .<span class="mt">suffix</span>(<span class="st">"x"</span>)
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"How bright light glow appears."</span>))
+            .<span class="mt">build</span>();
+
+        <span class="cm">// ── HUD ENTRIES ──</span>
+        <span class="ty">VinConfigBooleanEntry</span> showHud = <span class="ty">VinConfigBooleanEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"show_hud"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Show HUD"</span>), <span class="kw">true</span>)
+            .<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.SHOW_HUD)
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Toggle the HUD overlay."</span>))
+            .<span class="mt">preview</span>((state, value) -> <span class="ty">VinConfigPreview</span>.<span class="mt">configPic</span>(<span class="st">"visualmod"</span>,
+                value ? <span class="st">"hud_on.png"</span> : <span class="st">"hud_off.png"</span>,
+                <span class="ty">Component</span>.<span class="mt">literal</span>(value ? <span class="st">"HUD Visible"</span> : <span class="st">"HUD Hidden"</span>),
+                <span class="ty">Component</span>.<span class="mt">empty</span>()))
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigIntSliderEntry</span> hudOpacity = <span class="ty">VinConfigIntSliderEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"hud_opacity"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"HUD Opacity"</span>), <span class="nu">100</span>, <span class="nu">10</span>, <span class="nu">100</span>)
+            .<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.HUD_OPACITY)
+            .<span class="mt">suffix</span>(<span class="st">"%"</span>)
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"HUD transparency."</span>))
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigTextEntry</span> hudTitle = <span class="ty">VinConfigTextEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"hud_title"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"HUD Label"</span>), <span class="st">"Visual Mod"</span>)
+            .<span class="mt">forge</span>(<span class="ty">VisualModConfig</span>.HUD_TITLE)
+            .<span class="mt">maxLength</span>(<span class="nu">32</span>)
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Text shown in the HUD header."</span>))
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigActionEntry</span> resetRenderer = <span class="ty">VinConfigActionEntry</span>
+            .<span class="mt">builder</span>(<span class="st">"reset_renderer"</span>,
+                <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Reset Renderer"</span>),
+                <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Reload Shaders"</span>))
+            .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Force-reloads the rendering pipeline."</span>))
+            .<span class="mt">onPress</span>((state, ignored) -> <span class="ty">RenderPipeline</span>.<span class="mt">reload</span>())
+            .<span class="mt">build</span>();
+
+        <span class="cm">// ── DEFINITION ──</span>
+        <span class="ty">VinConfigDefinition</span> def = <span class="ty">VinConfigDefinition</span>
+            .<span class="mt">builder</span>(<span class="st">"visualmod"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Visual Mod"</span>))
+            .<span class="mt">subtitle</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Cinematic rendering for Minecraft Forge"</span>))
+            .<span class="mt">theme</span>(<span class="ty">VinConfigTheme</span>.<span class="mt">darkCinema</span>())
+            .<span class="mt">liveTheme</span>(state -> <span class="ty">VinConfigTheme</span>.<span class="mt">builder</span>()
+                .<span class="mt">backgroundTop</span>   (state.<span class="mt">get</span>(bgTopEntry))
+                .<span class="mt">backgroundBottom</span>(state.<span class="mt">get</span>(bgBottomEntry))
+                .<span class="mt">panel</span>           (<span class="nu">0xD9172434</span>)
+                .<span class="mt">panelSoft</span>       (<span class="nu">0xC9111825</span>)
+                .<span class="mt">panelStrong</span>     (<span class="nu">0xEE0B1120</span>)
+                .<span class="mt">accent</span>          (state.<span class="mt">get</span>(accentEntry))
+                .<span class="mt">textPrimary</span>     (<span class="nu">0xFFF8FAFC</span>)
+                .<span class="mt">textSecondary</span>   (<span class="nu">0xFFCBD5E1</span>)
+                .<span class="mt">outline</span>         (<span class="nu">0x66FFFFFF</span>)
+                .<span class="mt">build</span>())
+            .<span class="mt">category</span>(
+                <span class="ty">VinConfigCategory</span>.<span class="mt">builder</span>(<span class="st">"rendering"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Rendering"</span>))
+                    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"RTX, quality presets, and bloom settings."</span>))
+                    .<span class="mt">entry</span>(rtx)
+                    .<span class="mt">entry</span>(quality)
+                    .<span class="mt">entry</span>(bloom)
+                    .<span class="mt">build</span>()
+            )
+            .<span class="mt">category</span>(
+                <span class="ty">VinConfigCategory</span>.<span class="mt">builder</span>(<span class="st">"hud"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"HUD"</span>))
+                    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Heads-up display visibility and appearance."</span>))
+                    .<span class="mt">entry</span>(showHud)
+                    .<span class="mt">entry</span>(hudOpacity)
+                    .<span class="mt">entry</span>(hudTitle)
+                    .<span class="mt">entry</span>(resetRenderer)
+                    .<span class="mt">build</span>()
+            )
+            .<span class="mt">category</span>(
+                <span class="ty">VinConfigCategory</span>.<span class="mt">builder</span>(<span class="st">"colors"</span>, <span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Colors"</span>))
+                    .<span class="mt">description</span>(<span class="ty">Component</span>.<span class="mt">literal</span>(<span class="st">"Theme colors — changes apply live."</span>))
+                    .<span class="mt">entry</span>(bgTopEntry)
+                    .<span class="mt">entry</span>(bgBottomEntry)
+                    .<span class="mt">entry</span>(accentEntry)
+                    .<span class="mt">build</span>()
+            )
+            .<span class="mt">build</span>();
+
+        <span class="ty">VinConfigClientApi</span>.<span class="mt">registerConfigScreen</span>(def);
+    }
+}</code></pre>
+
+</div>
+</div>
+
+<!-- ── PAGE: API REFERENCE ── -->
+<div class="page" id="p-api-ref">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">Reference</div>
+    <h2>API Reference</h2>
+    <p class="subtitle">Quick-scan summary of every public class and method in the VinConfig API.</p>
+  </div>
+
+  <h3>VinConfigApi</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>definition(modId, title)</code></td><td>Shortcut to <code>VinConfigDefinition.builder()</code></td></tr>
+      <tr><td><code>register(definition)</code></td><td>Add to global registry (thread-safe)</td></tr>
+      <tr><td><code>get(modId)</code></td><td>Retrieve <code>Optional&lt;VinConfigDefinition&gt;</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>VinConfigClientApi</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>registerConfigScreen(def)</code></td><td>Register + hook Forge mod-list button</td></tr>
+      <tr><td><code>open(parent, def)</code></td><td>Return a new <code>Screen</code> without registering</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>VinConfigDefinition Builder</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>builder(modId, title)</code></td><td>—</td></tr>
+      <tr><td><code>subtitle(component)</code></td><td><code>Component.empty()</code></td></tr>
+      <tr><td><code>theme(VinConfigTheme)</code></td><td><code>VinConfigTheme.darkCinema()</code></td></tr>
+      <tr><td><code>liveTheme(state → theme)</code></td><td>Returns static theme</td></tr>
+      <tr><td><code>background(renderer)</code></td><td>No-op renderer</td></tr>
+      <tr><td><code>category(VinConfigCategory)</code></td><td>—</td></tr>
+      <tr><td><code>build()</code></td><td>—</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Entry Builders — Common Methods</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>.description(Component)</code></td><td>all</td><td>Tooltip text + row subtitle</td></tr>
+      <tr><td><code>.binding(VinConfigValueBinding&lt;T&gt;)</code></td><td>most</td><td>Custom binding</td></tr>
+      <tr><td><code>.forge(ForgeConfigSpec.*Value)</code></td><td>most</td><td>Shortcut forge binding</td></tr>
+      <tr><td><code>.preview((state, val) → VinConfigPreview)</code></td><td>all</td><td>Preview panel content</td></tr>
+      <tr><td><code>.onChanged((state, val) → void)</code></td><td>most</td><td>Change callback for value entries; <code>VinConfigActionEntry</code> uses <code>.onPress(...)</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Entry Types Summary</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Class</th><th>Type T</th><th>Extra Parameters</th></tr></thead>
+    <tbody>
+      <tr><td><code>VinConfigBooleanEntry</code></td><td><code>Boolean</code></td><td>—</td></tr>
+      <tr><td><code>VinConfigIntSliderEntry</code></td><td><code>Integer</code></td><td><code>min, max, step, suffix</code></td></tr>
+      <tr><td><code>VinConfigDoubleSliderEntry</code></td><td><code>Double</code></td><td><code>min, max, step, suffix</code></td></tr>
+      <tr><td><code>VinConfigTextEntry</code></td><td><code>String</code></td><td><code>maxLength</code></td></tr>
+      <tr><td><code>VinConfigEnumEntry&lt;E&gt;</code></td><td><code>E extends Enum</code></td><td><code>enumClass, labels(E → Component)</code></td></tr>
+      <tr><td><code>VinConfigColorEntry</code></td><td><code>Integer</code> (ARGB)</td><td>RGB only (alpha forced to 0xFF)</td></tr>
+      <tr><td><code>VinConfigActionEntry</code></td><td><code>Boolean</code> (unused)</td><td><code>buttonTitle, onPress</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>VinConfigBindings Factory Methods</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>forge(BooleanValue)</code></td><td>Forge boolean binding</td></tr>
+      <tr><td><code>forge(IntValue)</code></td><td>Forge integer binding</td></tr>
+      <tr><td><code>forge(DoubleValue)</code></td><td>Forge double binding</td></tr>
+      <tr><td><code>forge(EnumValue&lt;E&gt;)</code></td><td>Forge enum binding</td></tr>
+      <tr><td><code>forge(ConfigValue&lt;String&gt;)</code></td><td>Forge string binding</td></tr>
+      <tr><td><code>configValue(ConfigValue&lt;T&gt;)</code></td><td>Generic Forge config value</td></tr>
+      <tr><td><code>standalone(T defaultValue)</code></td><td>In-memory only, not persisted</td></tr>
+      <tr><td><code>of(getter, setter, defaultSupplier, saver)</code></td><td>Fully custom</td></tr>
+      <tr><td><code>mapped(ConfigValue&lt;S&gt;, reader, writer)</code></td><td>Type-transforming Forge binding</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>VinConfigPreview Factory Methods</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>none()</code></td><td>No preview (panel hidden)</td></tr>
+      <tr><td><code>image(ResourceLocation, title, desc)</code></td><td>Explicit resource location</td></tr>
+      <tr><td><code>configPic(modId, path, title, desc)</code></td><td>Shortcut: prepends <code>configpic/</code>, uses <code>modId</code> namespace</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>VinConfigState Methods</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>VinConfigState.load(definition)</code></td><td>Load from bindings</td></tr>
+      <tr><td><code>state.get(entry)</code></td><td>Read value (sanitized)</td></tr>
+      <tr><td><code>state.set(entry, value)</code></td><td>Write value + fire onChanged</td></tr>
+      <tr><td><code>state.reset(entry)</code></td><td>Revert to defaultValue</td></tr>
+      <tr><td><code>state.reset(category)</code></td><td>Revert entire category</td></tr>
+      <tr><td><code>state.resetAll()</code></td><td>Revert everything</td></tr>
+      <tr><td><code>state.save()</code></td><td>Write to bindings + flush TOML</td></tr>
+      <tr><td><code>state.copy()</code></td><td>Shallow copy of value map</td></tr>
+      <tr><td><code>state.definition()</code></td><td>Get the VinConfigDefinition</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>VinConfigTheme Builder Fields</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Field</th><th>Default (darkCinema)</th></tr></thead>
+    <tbody>
+      <tr><td><code>backgroundTop</code></td><td><code>0xFF111827</code></td></tr>
+      <tr><td><code>backgroundBottom</code></td><td><code>0xFF1F2937</code></td></tr>
+      <tr><td><code>panel</code></td><td><code>0xD91A2233</code></td></tr>
+      <tr><td><code>panelSoft</code></td><td><code>0xCC0F172A</code></td></tr>
+      <tr><td><code>panelStrong</code></td><td><code>0xEE111827</code></td></tr>
+      <tr><td><code>accent</code></td><td><code>0xFF4FD1C5</code></td></tr>
+      <tr><td><code>textPrimary</code></td><td><code>0xFFF8FAFC</code></td></tr>
+      <tr><td><code>textSecondary</code></td><td><code>0xFFCBD5E1</code></td></tr>
+      <tr><td><code>outline</code></td><td><code>0x66FFFFFF</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Keyboard Shortcuts (In-Screen)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>Save and stay on the screen (shows "Saved" toast)</td></tr>
+      <tr><td>Scroll wheel</td><td>Scroll the options list (only when inside the content area)</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>Save and stay on the screen (shows "Saved" toast) — triggers <code>saveAndStay()</code></td></tr>
+      <tr><td>Escape</td><td>Close (same as Close button — does NOT auto-save) — calls <code>onClose()</code></td></tr>
+    </tbody>
+  </table></div>
+
+</div>
+</div>
+
+<!-- ── PAGE: FULL DOC FOR LLM ── -->
+<div class="page" id="p-full-doc-llm">
+<div class="page-inner">
+  <div class="page-header">
+    <div class="breadcrumb">LLM</div>
+    <h2>Full doc for LLM - Vinconfig.txt</h2>
+    <p class="subtitle">This page provides the full doc file for language models. Use the button below to open the linked resource.</p>
+  </div>
+
+  <p>The full documentation file is available via the link below:</p>
+  <a class="download-btn" href="https://github.com/Vinlanx/vinconfigdoc/blob/main/Full%20doc%20for%20LLM.txt" target="_blank" rel="noopener noreferrer">Download</a>
+
+</div>
+</div>
+
+</main>
+
+<script>
+  function show(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const page = document.getElementById('p-' + pageId);
+    if (page) { page.classList.add('active'); page.scrollIntoView ? window.scrollTo(0,0) : null; }
+    event.currentTarget.classList.add('active');
+  }
+
+  // Make all internal anchor links work by scrolling to them
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
