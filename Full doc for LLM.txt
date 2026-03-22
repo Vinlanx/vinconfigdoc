@@ -1,0 +1,1176 @@
+﻿VinConfig
+Developer Reference Wiki
+GETTING STARTED
+Quick Start Registration 
+CONFIG ENTRIES
+Boolean Toggle Integer Slider Double Slider Text Field Enum Cycle Color Picker Action Button 
+BINDINGS
+Value Bindings Custom Bindings 
+UI & VISUALS
+Preview Panel Theming Live Theme Background Renderer 
+ADVANCED
+Config State Persistence / TOML Callbacks Full Example 
+REFERENCE
+API Reference 
+Full doc for LLM 
+Getting Started
+Quick Start
+From zero to a working config screen in under 5 minutes.
+On this page
+1. 1. Declare dependency
+2. 2. Create ForgeConfigSpec
+3. 3. Register spec in mod constructor
+4. 4. Build VinConfigDefinition
+5. 5. Register config screen
+Step 1 - Declare dependency
+VinConfig must be present on the client side. Add it as a required dependency in your mods.toml:
+MODS.TOML[[dependencies.yourmodid]]
+    modId = "vinconfig"
+    mandatory = true
+    versionRange = "[0.0.0.1,)"
+    ordering = "NONE"
+    side = "CLIENT"
+Additionally, add the library to your build system so it is available at compile time (example only - verify coordinates for your setup):
+GRADLE (EXAMPLE)// THIS IS AN EXAMPLE coordinate - check the correct groupId/artifactId/version for your environment
+implementation "com.vinlanx:vinconfig:1.0.0"
+Step 2 - Create your ForgeConfigSpec
+JAVA - EXAMPLEimport net.minecraftforge.common.ForgeConfigSpec;
+
+public final class MyConfig {
+    public static final ForgeConfigSpec SPEC;
+    public static final ForgeConfigSpec.BooleanValue  SHOW_HUD;
+    public static final ForgeConfigSpec.IntValue     HUD_SCALE;
+    public static final ForgeConfigSpec.DoubleValue  OPACITY;
+
+    static {
+        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        b.push("hud");
+        SHOW_HUD  = b.define("show_hud", true);
+        HUD_SCALE = b.defineInRange("hud_scale", 100, 50, 200);
+        OPACITY   = b.defineInRange("opacity", 1.0, 0.0, 1.0);
+        b.pop();
+        SPEC = b.build();
+    }
+}
+Step 3 - Register spec in mod constructor
+JAVA - EXAMPLEimport net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+
+@Mod("yourmod")
+public final class YourMod {
+    public YourMod() {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, MyConfig.SPEC);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            MyClientSetup.bootstrap();
+        }
+    }
+}
+Step 4 - Build VinConfigDefinition (client side)
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import com.vinlanx.vinconfig.api.VinConfigCategory;
+import com.vinlanx.vinconfig.api.VinConfigDefinition;
+import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;
+import com.vinlanx.vinconfig.client.VinConfigClientApi;
+import net.minecraft.network.chat.Component;
+
+public final class MyClientSetup {
+    public static void bootstrap() {
+        VinConfigBooleanEntry showHud = VinConfigBooleanEntry
+            .builder("show_hud", Component.literal("Show HUD"), true)
+            .forge(MyConfig.SHOW_HUD)
+            .description(Component.literal("Toggle the heads-up display."))
+            .build();
+
+        VinConfigIntSliderEntry scale = VinConfigIntSliderEntry
+            .builder("hud_scale", Component.literal("HUD Scale"), 100, 50, 200)
+            .forge(MyConfig.HUD_SCALE)
+            .suffix("%")
+            .build();
+
+        VinConfigDefinition def = VinConfigDefinition
+            .builder("yourmod", Component.literal("Your Mod Settings"))
+            .subtitle(Component.literal("Configure the mod to your liking"))
+            .category(
+                VinConfigCategory.builder("hud", Component.literal("HUD"))
+                    .entry(showHud)
+                    .entry(scale)
+                    .build()
+            )
+            .build();
+
+        VinConfigClientApi.registerConfigScreen(def);
+    }
+}
+Step 5 - Done!
+Calling VinConfigClientApi.registerConfigScreen(def) does two things simultaneously:
+* Registers the definition in the global VinConfigApi registry so other mods can look it up.
+* Calls MinecraftForge.registerConfigScreen() so your mod's "Config" button in the mod list opens your new screen.
+You can also open the screen manually with VinConfigClientApi.open(parentScreen, definition) - useful if you want to trigger it from a keybinding or in-game button.
+Getting Started
+Registration
+How to register your config definition and retrieve it from other code.
+VinConfigApi - Global Registry
+VinConfigApi is a thread-safe global map from modId → VinConfigDefinition. It is the lightweight registry used by VinConfig to store definitions that have been registered during client setup.
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigApi;
+import com.vinlanx.vinconfig.api.VinConfigDefinition;
+import java.util.Optional;
+import net.minecraft.network.chat.Component;
+
+// Register a definition
+VinConfigApi.register(myDefinition);
+
+// Look up any registered mod's definition
+Optional<VinConfigDefinition> def = VinConfigApi.get("somemodid");
+
+// Build a definition using the convenience method
+VinConfigDefinition.Builder builder = VinConfigApi.definition("yourmod", Component.literal("Title"));
+VinConfigClientApi - Client Screen
+Only call this from the client dist. Both methods are safe to call in @Mod constructor when guarded by FMLEnvironment.dist == Dist.CLIENT.
+MethodReturnsDescription
+registerConfigScreen(def) void Registers the definition AND hooks it as the Forge mod-list config screen. 
+open(parent, def) Screen Returns a new VinConfigScreen you can push manually. Does not register anything. 
+VinConfigDefinition Builder
+Every config screen starts with a definition. Here are all the builder methods:
+MethodTypeDescription
+builder(modId, title) static Start building. modId is your mod's ID string. 
+.subtitle(component) Component Short description shown under the title. Supports word wrap. 
+.theme(VinConfigTheme) static theme Apply a static color theme. Use VinConfigTheme.darkCinema() for default. 
+.liveTheme(state → theme) Function Dynamic theme that re-evaluates on every frame using the current working state. 
+.background(renderer) functional Custom background drawn before the gradient fill. Receives GuiGraphics, size, theme, mouse pos. 
+.category(VinConfigCategory) repeatable Add a tab category. Call multiple times to add multiple tabs. 
+.build() → Definition Produce the immutable VinConfigDefinition record. 
+VinConfigCategory Builder
+MethodTypeDescription
+builder(id, title) static Start. id is an internal string key for this tab. 
+.description(component) Component Subtitle shown below the category name at the top of the content area. 
+.entry(VinConfigEntry) repeatable Add any entry type. Order is preserved. 
+.build() → Category Returns an immutable category record. 
+Config Entries
+Boolean Toggle VINCONFIGBOOLEANENTRY
+An ON/OFF toggle switch. The most common entry type - use it for feature flags and visibility toggles.
+Builder Parameters
+MethodTypeDescription
+builder(key, title, default) static Required. key is a unique string for this entry. default is the fallback boolean value. 
+.description(component) Component Tooltip + subtitle shown in the row card. 
+.forge(BooleanValue) ForgeConfigSpec Bind to a Forge config value. Handles get/set/save automatically. 
+.binding(binding) VinConfigValueBinding Bind to a custom binding. Use when not using ForgeConfigSpec. 
+.preview((state, val) → ...) BiFunction Return a VinConfigPreview to show in the right panel when this row is hovered. 
+.onChanged((state, val) → ...) BiConsumer Called immediately when the user toggles the value. 
+Basic Example
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+VinConfigBooleanEntry entry = VinConfigBooleanEntry
+    .builder("show_hud", Component.literal("Show HUD"), true)
+    .forge(MyConfig.SHOW_HUD)
+    .description(Component.literal("Toggles the heads-up display overlay."))
+    .build();
+With Conditional Preview Images
+One of VinConfig's most powerful features: show a different image depending on whether the toggle is ON or OFF. This is perfect for visual settings like enabling RTX, night vision, shaders, etc.
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+VinConfigBooleanEntry rtxEnabled = VinConfigBooleanEntry
+    .builder("rtx_enabled", Component.literal("RTX Lighting"), false)
+    .forge(MyConfig.RTX_ENABLED)
+    .description(Component.translatable("tooltip.yourmod.rtx_enabled"))
+    .preview((state, value) -> {
+        boolean enabled = Boolean.TRUE.equals(value);
+        String img = enabled ? "rt_on.png" : "rt_off.png";
+        return VinConfigPreview.configPic(
+            "yourmod", img,
+            Component.literal(enabled ? "RTX: ON" : "RTX: OFF"),
+            Component.literal("Ray-traced lighting changes the look dramatically.")
+        );
+    })
+    .build();
+Place your preview images at assets/yourmod/configpic/rt_on.png and assets/yourmod/configpic/rt_off.png. VinConfigPreview.configPic() automatically prepends the configpic/ path.
+With onChanged callback
+JAVAimport com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+VinConfigBooleanEntry nightMode = VinConfigBooleanEntry
+    .builder("night_mode", Component.literal("Night Mode"), false)
+    .forge(MyConfig.NIGHT_MODE)
+    .onChanged((state, value) -> {
+        // Runs immediately when toggled - before Save is pressed
+        NightModeManager.setActive(value);
+    })
+    .build();
+The onChanged callback fires on every toggle change in the working state, not only on final Save. The callback receives the current VinConfigState and the new value, so you can read other settings too.
+Config Entries
+Integer Slider VINCONFIGINTSLIDERENTRY
+A draggable slider for integer values with optional step snapping and value suffix.
+Builder Parameters
+MethodTypeDescription
+builder(key, title, default, min, max) static Required. Sets default value and inclusive range. 
+.step(int) int Snap interval. Default = 1. E.g., step(5) makes the slider jump 0, 5, 10, 15... 
+.suffix(String) String Appended to the displayed value, e.g. "%", " px", " fps". 
+.forge(IntValue) ForgeConfigSpec Two-way binding to a ForgeConfigSpec.IntValue. 
+.binding(binding) VinConfigValueBinding Custom binding when not using Forge. 
+.description(component) Component Tooltip + row subtitle. 
+.preview(...) / .onChanged(...) BiFunction/BiConsumer Preview factory and change callback. Same semantics as Boolean. 
+Examples
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;
+import com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+// Simple percentage slider
+VinConfigIntSliderEntry volume = VinConfigIntSliderEntry
+    .builder("music_volume", Component.literal("Music Volume"), 80, 0, 100)
+    .forge(MyConfig.MUSIC_VOLUME)
+    .suffix("%")
+    .build();
+
+// Slider that snaps to multiples of 5
+VinConfigIntSliderEntry frameLimit = VinConfigIntSliderEntry
+    .builder("frame_limit", Component.literal("Frame Limit"), 60, 30, 240)
+    .forge(MyConfig.FRAME_LIMIT)
+    .step(5)
+    .suffix(" fps")
+    .description(Component.literal("Maximum frames per second."))
+    .build();
+
+// Dynamic preview that changes based on chosen value
+VinConfigIntSliderEntry quality = VinConfigIntSliderEntry
+    .builder("quality", Component.literal("Render Quality"), 2, 1, 4)
+    .forge(MyConfig.QUALITY)
+    .preview((state, value) -> {
+        String[] images = { "q_low.png", "q_med.png", "q_high.png", "q_ultra.png" };
+        int idx = Mth.clamp(value - 1, 0, 3);
+        return VinConfigPreview.configPic("yourmod", images[idx],
+            Component.literal("Quality level " + value),
+            Component.literal("Higher values look better but cost performance."));
+    })
+    .build();
+Sanitization
+Values are automatically clamped to [min, max] and snapped to the nearest step. This happens both when reading from config and when the user drags the slider. You never need to clamp manually.
+Config Entries
+Double Slider VINCONFIGDOUBLESLIDERENTRY
+A floating-point slider with configurable step precision and suffix formatting.
+Builder Parameters
+MethodTypeDescription
+builder(key, title, default, min, max) static Required. All values are double. 
+.step(double) double Snap resolution. Default = 0.01. Set to 0 for continuous. 
+.suffix(String) String Appended after the %.2f formatted value. E.g. "x" → "1.50x". 
+.forge(DoubleValue) ForgeConfigSpec Bind to ForgeConfigSpec.DoubleValue. 
+.binding / .description / .preview / .onChanged - Same as other entry types. 
+Examples
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigDoubleSliderEntry;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+// Animation speed multiplier
+VinConfigDoubleSliderEntry animSpeed = VinConfigDoubleSliderEntry
+    .builder("anim_speed", Component.literal("Animation Speed"), 1.0, 0.4, 2.5)
+    .forge(MyConfig.ANIM_SPEED)
+    .step(0.05)
+    .suffix("x")
+    .description(Component.literal("1.0x is default speed."))
+    .build();
+
+// Opacity from 0% to 100% in 5% increments
+VinConfigDoubleSliderEntry opacity = VinConfigDoubleSliderEntry
+    .builder("bg_opacity", Component.literal("Background Opacity"), 0.8, 0.0, 1.0)
+    .forge(MyConfig.BG_OPACITY)
+    .step(0.05)
+    .suffix("")
+    .build();
+Displayed Format
+Values are displayed as "%.2f%s" - always two decimal places followed by the suffix. This is handled automatically by VinConfigDoubleSliderEntry.format(double value). You don't need to call it yourself.
+Config Entries
+Text Field VINCONFIGTEXTENTRY
+A single-line editable text input with configurable maximum length.
+Builder Parameters
+MethodTypeDescription
+builder(key, title, defaultValue) static Required. defaultValue is the initial string. 
+.maxLength(int) int Maximum character count. Default = 128. Strings longer than this are silently truncated on sanitization. 
+.forge(ConfigValue<String>) ForgeConfigSpec Bind to a Forge string config value. 
+.binding / .description / .preview / .onChanged - Same as other entry types. 
+Examples
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigPreview;
+import com.vinlanx.vinconfig.api.VinConfigTextEntry;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+// Short player title/label
+VinConfigTextEntry playerTitle = VinConfigTextEntry
+    .builder("player_title", Component.literal("Player Title"), "Explorer")
+    .forge(MyConfig.PLAYER_TITLE)
+    .maxLength(24)
+    .description(Component.literal("Short tag displayed above your character."))
+    .build();
+
+// Server address with longer limit
+VinConfigTextEntry serverAddr = VinConfigTextEntry
+    .builder("server_address", Component.literal("Server Address"), "play.example.com")
+    .forge(MyConfig.SERVER_ADDR)
+    .maxLength(255)
+    .build();
+
+// Text that affects the live preview
+VinConfigTextEntry heroTitle = VinConfigTextEntry
+    .builder("hero_title", Component.literal("Hero Title"), "My cinematic config")
+    .forge(MyConfig.HERO_TITLE)
+    .maxLength(42)
+    .preview((state, value) ->
+        VinConfigPreview.configPic("yourmod", "title_preview.png",
+            Component.literal(value),
+            Component.literal("This text will appear in the UI.")))
+    .build();
+The text field renders as a styled EditBox that matches the current theme colors. The cursor blinks and selection works normally. It ticks every frame to update the cursor animation.
+Config Entries
+Enum Cycle VINCONFIGENUMENTRY
+A left/right cycle button that steps through all values of a Java enum. Optionally provide custom display labels.
+Builder Parameters
+MethodTypeDescription
+builder(key, title, enumClass, default) static Required. Reads all constants from the enum via reflection. 
+.labels(E → Component) Function Map each enum constant to a display component. Default: Component.literal(e.name()). 
+.forge(EnumValue<E>) ForgeConfigSpec Bind to a Forge enum config value. 
+.binding / .description / .preview / .onChanged - Same as other entry types. 
+Define an Enum
+JAVA - EXAMPLE// In your config class or a standalone file:
+public enum RenderMode {
+    FAST   ("Fast"),
+    BALANCED("Balanced"),
+    QUALITY("Quality");
+
+    public final String label;
+    RenderMode(String label) { this.label = label; }
+}
+Examples
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigEnumEntry;
+import com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+// Simple enum with custom labels
+VinConfigEnumEntry<RenderMode> renderMode = VinConfigEnumEntry
+    .<RenderMode>builder("render_mode", Component.literal("Render Mode"),
+        RenderMode.class, RenderMode.BALANCED)
+    .forge(MyConfig.RENDER_MODE)
+    .labels(mode -> Component.literal(mode.label))
+    .description(Component.literal("Controls rendering fidelity vs performance."))
+    .build();
+
+// Enum with different image preview per value
+VinConfigEnumEntry<RenderMode> renderModePreview = VinConfigEnumEntry
+    .<RenderMode>builder("render_mode", Component.literal("Render Mode"),
+        RenderMode.class, RenderMode.BALANCED)
+    .forge(MyConfig.RENDER_MODE)
+    .labels(mode -> Component.literal(mode.label))
+    .preview((state, value) -> {
+        String img;
+        switch (value) {
+            case FAST    -> img = "render_fast.png";
+            case QUALITY -> img = "render_quality.png";
+            default      -> img = "render_balanced.png";
+        }
+        return VinConfigPreview.configPic("yourmod", img,
+            Component.literal(value.label),
+            Component.literal("Preview of this render mode."));
+    })
+    .build();
+Clicking the cycle button steps forward through constants in declaration order. It wraps from the last back to the first. There is no reverse direction button - keep your enums short (2-5 values) for the best UX.
+Config Entries
+Color Picker VINCONFIGCOLORENTRY
+Three separate RGB channel sliders with a live hex color swatch. Stores values as packed int (0xRRGGBB with forced full alpha).
+Builder Parameters
+MethodTypeDescription
+builder(key, title, defaultValue) static Default is an int color like 0xFF4FD1C5. 
+.binding(VinConfigValueBinding<Integer>) custom Custom binding for the color value. 
+.description / .preview / .onChanged - Same as other entry types. 
+Alpha is forced to 0xFF. The sanitize() method on VinConfigColorEntry always applies 0xFF000000 | (value & 0x00FFFFFF). You cannot store semi-transparent colors in a color entry - it's RGB only. For alpha, use a separate VinConfigDoubleSliderEntry.
+Forge Config Note
+Forge's ForgeConfigSpec has no native color type, so use IntValue with range 0x000000 to 0xFFFFFF:
+JAVA - FORGECONFIGSPECimport net.minecraftforge.common.ForgeConfigSpec;
+
+// In your config spec builder:
+ACCENT_COLOR = builder.defineInRange("accent_color", 0x4FD1C5, 0x000000, 0xFFFFFF);
+JAVA - VINCONFIG ENTRYimport com.vinlanx.vinconfig.api.VinConfigBindings;
+import com.vinlanx.vinconfig.api.VinConfigColorEntry;
+import net.minecraft.network.chat.Component;
+
+VinConfigColorEntry accentColor = VinConfigColorEntry
+    .builder("accent_color", Component.literal("Accent Color"), 0xFF4FD1C5)
+    .binding(VinConfigBindings.forge(MyConfig.ACCENT_COLOR))
+    .description(Component.literal("Used for borders, sliders, and tabs."))
+    .build();
+Reading the Color Value
+JAVA - EXAMPLE// In a preview lambda or onChanged callback:
+int color = state.get(accentColor);  // e.g. 0xFF4FD1C5
+int red   = (color >> 16) & 0xFF;
+int green = (color >>  8) & 0xFF;
+int blue  =  color        & 0xFF;
+Use with Live Theme
+Color entries are perfect for live-theming - let users change the accent or background colors and see them update in real time. See the Live Theme page for the full pattern.
+Config Entries
+Action Button VINCONFIGACTIONENTRY
+A clickable button in a settings row. Use for running one-shot actions: clearing caches, sending test messages, resetting specific sub-systems, etc.
+Builder Parameters
+MethodTypeDescription
+builder(key, title, buttonTitle) static title = row title text. buttonTitle = label on the button itself. 
+.description(component) Component Row subtitle / tooltip. 
+.onPress((state, ignored) → ...) BiConsumer Called when the button is clicked. The second argument is always false - ignore it. Use state to read current working values. 
+.preview(...) BiFunction Preview shown when this row is hovered (second arg always false). 
+VinConfigActionEntry extends VinConfigEntry<Boolean> internally and is bound to a standalone false value. The boolean state has no meaningful value - only the onPress callback matters.
+Examples
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigActionEntry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+
+// Send a test notification
+VinConfigActionEntry testNotify = VinConfigActionEntry
+    .builder("test_notify",
+        Component.literal("Test Notification"),
+        Component.literal("Send Test"))
+    .description(Component.literal("Fires a test notification to verify settings."))
+    .onPress((state, ignored) -> {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            mc.player.displayClientMessage(
+                Component.literal(" Notification system works!"), true);
+        }
+    })
+    .build();
+
+// Clear a cache - reads another setting from state
+VinConfigActionEntry clearCache = VinConfigActionEntry
+    .builder("clear_cache",
+        Component.literal("Clear Cache"),
+        Component.literal("Clear Now"))
+    .onPress((state, ignored) -> {
+        boolean verbose = state.get(verboseLogging);  // read other entry
+        MyCacheManager.clear(verbose);
+    })
+    .build();
+Bindings
+Value Bindings
+VinConfigValueBinding<T> is the bridge between VinConfig's working state and wherever your values actually live (Forge config, memory, a database, etc.).
+The Interface
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigValueBinding;
+
+public interface VinConfigValueBinding<T> {
+    T    get();            // read the current stored value
+    void set(T value);     // write a new value to the store
+    T    defaultValue();   // return the default (for Reset)
+    void save();           // persist to disk (called during Save)
+}
+Built-in Factories - VinConfigBindings
+forge() - ForgeConfigSpec direct binding
+Handles all standard Forge value types. The most common way to bind entries.
+JAVA - EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigBindings;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+// Boolean
+VinConfigBindings.forge(MyConfig.SHOW_HUD)
+
+// Integer
+VinConfigBindings.forge(MyConfig.HUD_SCALE)
+
+// Double
+VinConfigBindings.forge(MyConfig.OPACITY)
+
+// Enum
+VinConfigBindings.forge(MyConfig.RENDER_MODE)
+
+// String
+VinConfigBindings.forge(MyConfig.HERO_TITLE)
+standalone() - in-memory only
+Stores the value in a local field. Nothing is persisted - useful for temporary UI state, demo entries, or when you manage persistence yourself.
+JAVAimport com.vinlanx.vinconfig.api.VinConfigBindings;
+import com.vinlanx.vinconfig.api.VinConfigValueBinding;
+
+VinConfigValueBinding<Boolean> temp = VinConfigBindings.standalone(false);
+VinConfigValueBinding<String>  label = VinConfigBindings.standalone("Hello");
+of() - fully custom
+Build any binding from four lambdas. Most flexible option.
+JAVAimport com.vinlanx.vinconfig.api.VinConfigBindings;
+import com.vinlanx.vinconfig.api.VinConfigValueBinding;
+
+VinConfigValueBinding<Integer> binding = VinConfigBindings.of(
+    () -> MyStore.getVolume(),          // getter
+    v  -> MyStore.setVolume(v),         // setter
+    ()  -> 80,                           // default supplier
+    ()  -> MyStore.flush()              // saver
+);
+mapped() - transform types
+Forge stores a raw type, but your entry needs a different type? Map it bidirectionally.
+JAVAimport com.vinlanx.vinconfig.api.VinConfigBindings;
+import com.vinlanx.vinconfig.api.VinConfigValueBinding;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+// Store color as hex String in Forge, expose as int in VinConfig
+VinConfigValueBinding<Integer> colorBinding = VinConfigBindings.mapped(
+    MyConfig.COLOR_HEX,                              // ForgeConfigSpec.ConfigValue<String>
+    hex -> Integer.parseUnsignedInt(hex, 16),         // String → int reader
+    color -> String.format("%06X", color & 0xFFFFFF) // int → String writer
+);
+mapped() uses ForgeConfigSpec.ConfigValue<S> as the source, so save() still calls the Forge value's save() internally. You get full TOML persistence with custom types for free.
+Bindings
+Custom Bindings
+Implementing VinConfigValueBinding<T> directly for advanced use cases.
+Full Custom Implementation
+Implement the interface anonymously or as a class for complete control. This example uses a Properties file as the backing store:
+JAVAimport com.vinlanx.vinconfig.api.VinConfigValueBinding;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
+
+public class PropertiesBinding implements VinConfigValueBinding<String> {
+    private final Properties props;
+    private final String propKey;
+    private final String defaultVal;
+    private final Path  filePath;
+
+    public PropertiesBinding(Properties props, String key, String def, Path path) {
+        this.props = props; this.propKey = key;
+        this.defaultVal = def; this.filePath = path;
+    }
+
+    @Override public String get() {
+        return props.getProperty(propKey, defaultVal);
+    }
+    @Override public void set(String value) {
+        props.setProperty(propKey, value);
+    }
+    @Override public String defaultValue() {
+        return defaultVal;
+    }
+    @Override public void save() {
+        try (var out = Files.newOutputStream(filePath)) {
+            props.store(out, null);
+        } catch (IOException e) { /* handle */ }
+    }
+}
+Standalone + Manual Save Pattern
+If you use standalone() but still want to persist via your own mechanism, attach an onChanged callback to trigger saves, or override save() in your binding:
+JAVAimport com.vinlanx.vinconfig.api.VinConfigBindings;
+import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import net.minecraft.network.chat.Component;
+
+VinConfigBooleanEntry myFlag = VinConfigBooleanEntry
+    .builder("flag", Component.literal("Feature Flag"), false)
+    .binding(VinConfigBindings.of(
+        MyStore::getFlag,
+        MyStore::setFlag,
+        () -> false,
+        MyStore::persist
+    ))
+    .build();
+UI & Visuals
+Preview Panel
+Show a texture image with title and description in the right-side panel whenever the user hovers an entry row.
+How it works
+Every VinConfigEntry can declare a previewFactory. When the user hovers (or focuses) that entry's row, the screen calls the factory with the current VinConfigState and value, then renders the returned VinConfigPreview in the right panel.
+If the preview has no image (image == null), the panel is hidden entirely - it only appears when there's actually something to show.
+VinConfigPreview Factory Methods
+Factory MethodReturnsDescription
+VinConfigPreview.none() static No preview. The panel disappears. This is the default for all entries. 
+VinConfigPreview.image(location, title, desc) static Show an image at an explicit ResourceLocation. 
+VinConfigPreview.configPic(modId, path, title, desc) static Convenience: prepends configpic/ to path if missing, then calls image(). 
+Image Location Convention
+Use configPic(modId, "filename.png", ...) - it resolves to:
+PATHassets/yourmod/configpic/filename.png
+In your mod's resources directory:
+DIRECTORY STRUCTUREsrc/main/resources/
+  assets/
+    yourmod/
+      configpic/
+        rt_on.png
+        rt_off.png
+        quality_low.png
+        quality_high.png
+        ...
+Conditional Image (Value-Reactive Preview)
+The previewFactory receives the current live value from the working state, so you can switch images dynamically:
+JAVA - BOOLEAN TOGGLE SWITCHING IMAGESimport com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+
+.preview((state, value) -> {
+    String img = value ? "enabled.png" : "disabled.png";
+    return VinConfigPreview.configPic("yourmod", img,
+        Component.literal(value ? "Enabled" : "Disabled"),
+        Component.literal("See the visual difference."));
+})
+JAVA - ENUM CYCLE SWITCHING IMAGESimport com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+
+.preview((state, value) -> switch (value) {
+    case DAY   -> VinConfigPreview.configPic("yourmod", "time_day.png",
+                     Component.literal("Day"), Component.literal("Bright daytime sky."));
+    case NIGHT -> VinConfigPreview.configPic("yourmod", "time_night.png",
+                     Component.literal("Night"), Component.literal("Stars visible."));
+    default    -> VinConfigPreview.none();
+})
+JAVA - SLIDER SHOWING QUALITY IMAGES (MULTI-IMAGE)import com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+
+.preview((state, value) -> {
+    String[] imgs = { "q1.png", "q2.png", "q3.png", "q4.png" };
+    int idx = Mth.clamp(value - 1, 0, 3);
+    return VinConfigPreview.configPic("yourmod", imgs[idx],
+        Component.literal("Quality " + value),
+        Component.literal("Higher values use more GPU."));
+})
+Cross-entry Previews (Reading Other Values)
+The factory receives the entire VinConfigState, not just the entry's own value. You can read any other entry:
+JAVAimport com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;
+import com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+
+// Show different image based on ANOTHER entry's value
+.preview((state, value) -> {
+    boolean rtxOn = state.get(rtxEnabledEntry);
+    int     quality = state.get(qualityEntry);
+    String  img = rtxOn ? "rtx_q" + quality + ".png" : "std_q" + quality + ".png";
+    return VinConfigPreview.configPic("yourmod", img,
+        Component.literal("Combined preview"),
+        Component.literal("RTX " + (rtxOn ? "ON" : "OFF") + ", Q" + quality));
+})
+The preview fades in with a smooth animation when switching between entries. The image is drawn with alpha from 0.35 → 1.0 during the fade. A colored accent bar grows in at the bottom of the panel simultaneously.
+Recommended Image Specs
+PropertyRecommendationFormatPNG (with or without transparency)Aspect ratio16:9 or any - VinConfig stretches to fill the preview boxSize256×144 or 512×288 - small enough to load fastLocationassets/yourmod/configpic/name.pngUI & Visuals
+Theming
+Control every color in the config screen with a VinConfigTheme record. Swap the entire palette in one call.
+VinConfigTheme Fields
+FieldUsed ForDefault (darkCinema)backgroundTopTop gradient color of the full-screen backdrop0xFF111827backgroundBottomBottom gradient color of the backdrop0xFF1F2937panelMain content panel background0xD91A2233panelSoftTab sidebar and content area inset0xCC0F172ApanelStrongPreview panel, hovered rows, button backgrounds0xEE111827accentActive tab, slider fill, scroll knob, outlines, focus ring0xFF4FD1C5textPrimaryTitles, button labels, values0xFFF8FAFCtextSecondaryDescriptions, subtitles, slider channel labels0xFFCBD5E1outlinePanel border, widget outlines0x66FFFFFFColors are ARGB integers: the upper byte is alpha, then red, green, blue. E.g. 0xCC0F172A has alpha = 0xCC ≈ 80% opacity, and RGB = #0F172A.
+Using the Built-in Dark Cinema Theme
+JAVAimport com.vinlanx.vinconfig.api.VinConfigDefinition;
+import com.vinlanx.vinconfig.api.VinConfigTheme;
+import net.minecraft.network.chat.Component;
+
+VinConfigDefinition.builder("yourmod", title)
+    .theme(VinConfigTheme.darkCinema())  // built-in default
+    ...
+Building a Custom Theme
+JAVA - WARM AMBER THEMEimport com.vinlanx.vinconfig.api.VinConfigDefinition;
+import com.vinlanx.vinconfig.api.VinConfigTheme;
+import net.minecraft.network.chat.Component;
+
+VinConfigTheme warmTheme = VinConfigTheme.builder()
+    .backgroundTop    (0xFF1C1100)
+    .backgroundBottom (0xFF2D1B00)
+    .panel            (0xD9201800)
+    .panelSoft        (0xCC180E00)
+    .panelStrong      (0xEE1A1000)
+    .accent           (0xFFFFB454)  // warm amber accent
+    .textPrimary      (0xFFFFF8EC)
+    .textSecondary    (0xFFD4B896)
+    .outline          (0x55FFFFFF)
+    .build();
+
+VinConfigDefinition.builder("yourmod", title)
+    .theme(warmTheme)
+    ...
+JAVA - CLEAN LIGHT THEMEimport com.vinlanx.vinconfig.api.VinConfigTheme;
+
+VinConfigTheme lightTheme = VinConfigTheme.builder()
+    .backgroundTop    (0xFFF0F4FF)
+    .backgroundBottom (0xFFE2E8F0)
+    .panel            (0xF0FFFFFF)
+    .panelSoft        (0xE8F8FAFC)
+    .panelStrong      (0xF8FFFFFF)
+    .accent           (0xFF6366F1)  // indigo accent
+    .textPrimary      (0xFF1E293B)
+    .textSecondary    (0xFF475569)
+    .outline          (0x22000000)
+    .build();
+UI & Visuals
+Live Theme
+Make the config screen re-theme itself in real time as the user changes color entries - no save required.
+How it works
+Instead of .theme(staticTheme), call .liveTheme(state -> VinConfigTheme). On every render frame, the screen calls this function with the current working state (unsaved changes included) and uses the returned theme to paint everything.
+JAVA - FULL LIVE THEME EXAMPLEimport com.vinlanx.vinconfig.api.VinConfigBindings;
+import com.vinlanx.vinconfig.api.VinConfigCategory;
+import com.vinlanx.vinconfig.api.VinConfigColorEntry;
+import com.vinlanx.vinconfig.api.VinConfigDefinition;
+import com.vinlanx.vinconfig.api.VinConfigTheme;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+// Define color entries first
+VinConfigColorEntry bgTop = VinConfigColorEntry
+    .builder("bg_top", Component.literal("Top Color"), 0xFF0F172A)
+    .binding(VinConfigBindings.forge(MyConfig.BG_TOP))
+    .build();
+
+VinConfigColorEntry bgBottom = VinConfigColorEntry
+    .builder("bg_bottom", Component.literal("Bottom Color"), 0xFF1E293B)
+    .binding(VinConfigBindings.forge(MyConfig.BG_BOTTOM))
+    .build();
+
+VinConfigColorEntry accent = VinConfigColorEntry
+    .builder("accent", Component.literal("Accent Color"), 0xFFFFB454)
+    .binding(VinConfigBindings.forge(MyConfig.ACCENT))
+    .build();
+
+// Then wire them into liveTheme
+VinConfigDefinition def = VinConfigDefinition
+    .builder("yourmod", Component.literal("My Mod"))
+    // Static fallback used before entries are loaded:
+    .theme(VinConfigTheme.darkCinema())
+    // Live function re-runs every frame:
+    .liveTheme(state -> VinConfigTheme.builder()
+        .backgroundTop   (state.get(bgTop))
+        .backgroundBottom(state.get(bgBottom))
+        .panel           (0xD9172434)
+        .panelSoft       (0xC9111825)
+        .panelStrong     (0xEE0B1120)
+        .accent          (state.get(accent))
+        .textPrimary     (0xFFF8FAFC)
+        .textSecondary   (0xFFCBD5E1)
+        .outline         (0x66FFFFFF)
+        .build())
+    .category(
+        VinConfigCategory.builder("colors", Component.literal("Colors"))
+            .entry(bgTop)
+            .entry(bgBottom)
+            .entry(accent)
+            .build()
+    )
+    .build();
+The live theme function runs on every render frame. Keep it lightweight - just reading state values and constructing a theme record is perfectly fine. Avoid heavy computation inside it.
+Calling .theme() after .liveTheme() (or vice versa) overwrites the previous setting. The last one set wins. If you call both, put .theme() first as a static fallback, then .liveTheme() to override it.
+UI & Visuals
+Background Renderer
+Inject arbitrary rendering behind the gradient backdrop - particles, scrolling textures, animated patterns, anything.
+The Interface
+JAVAimport com.vinlanx.vinconfig.api.VinConfigBackgroundRenderer;
+import com.vinlanx.vinconfig.api.VinConfigTheme;
+import net.minecraft.client.gui.GuiGraphics;
+
+@FunctionalInterface
+public interface VinConfigBackgroundRenderer {
+    void render(
+        GuiGraphics graphics,
+        int width,
+        int height,
+        VinConfigTheme theme,
+        int mouseX,
+        int mouseY,
+        float partialTick
+    );
+}
+The renderer runs before the gradient fill and panel drawing. This means your custom background appears underneath everything.
+Examples
+JAVA - TILED TEXTURE BACKGROUNDimport net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+
+.background((graphics, w, h, theme, mouseX, mouseY, tick) -> {
+    ResourceLocation tex = ResourceLocation.fromNamespaceAndPath("yourmod", "textures/gui/bg_tile.png");
+    for (int x = 0; x < w; x += 64) {
+        for (int y = 0; y < h; y += 64) {
+            graphics.blit(tex, x, y, 0, 0, 64, 64, 64, 64);
+        }
+    }
+})
+JAVA - SCROLLING STAR FIELD EFFECTimport net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
+import java.util.Random;
+
+private static long bgStart = Util.getMillis();
+
+// In definition builder:
+.background((graphics, w, h, theme, mouseX, mouseY, tick) -> {
+    float t = ((Util.getMillis() - bgStart) / 60000.0f) % 1.0f;
+    Random rng = new Random(42);
+    for (int i = 0; i < 80; i++) {
+        int sx = (int)((rng.nextFloat() * w + t * w * 0.3f) % w);
+        int sy = (int)(rng.nextFloat() * h);
+        int size = rng.nextInt(3) + 1;
+        graphics.fill(sx, sy, sx + size, sy + size, 0x44FFFFFF);
+    }
+})
+JAVA - ACCENT-COLORED PARTICLE DRIFT USING THEME COLORimport net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
+import java.util.Random;
+
+.background((graphics, w, h, theme, mouseX, mouseY, tick) -> {
+    long ms = Util.getMillis();
+    Random rng = new Random(7);
+    int accent = (theme.accent() & 0x00FFFFFF) | 0x18000000;
+    for (int i = 0; i < 40; i++) {
+        float speed = rng.nextFloat() * 20f + 5f;
+        int px = (int)(rng.nextFloat() * w);
+        int py = (int)((rng.nextFloat() * h - ms / speed) % h + h) % h;
+        graphics.fill(px, py, px + 2, py + 6, accent);
+    }
+})
+The background renderer receives the live theme, so if you use liveTheme(), your background can react to the user's color choices in real time.
+Advanced
+Config State
+VinConfigState is the working copy of all config values while the screen is open. Changes are only written to bindings when the user saves.
+State Lifecycle
+1. Screen opens → state loaded 
+VinConfigState.load(definition) calls readBoundValue() on every entry, building an in-memory map of the current saved values.
+2. User edits → working state updated 
+Each widget calls state.set(entry, newValue). This only updates the in-memory map and fires onChanged callbacks.
+3. User saves → written to bindings 
+state.save() calls writeBoundValue(get(entry)) then saveBoundValue() for every entry, then flushes TOML via VinConfigTomlPersistence.
+4. User closes without saving → changes discarded 
+The working state is garbage collected. Bindings are unchanged.
+VinConfigState API
+MethodTypeDescription
+VinConfigState.load(def) static Create a fresh state from the definition's current binding values. 
+state.get(entry) T Read a working value. If the key is missing, falls back to entry.defaultValue() and caches it. 
+state.set(entry, value) void Write a working value. Sanitizes the value and fires onChanged. 
+state.reset(entry) void Revert a single entry to its defaultValue(). 
+state.reset(category) void Revert all entries in a category. 
+state.resetAll() void Revert every entry across all categories. 
+state.save() void Write all working values to bindings and flush to disk. 
+state.copy() VinConfigState Shallow copy of the value map (used internally to create the "stored" snapshot). 
+state.definition() VinConfigDefinition Access the definition this state belongs to. 
+Using State in Callbacks
+JAVA - READING OTHER ENTRIES INSIDE PREVIEW OR ONCHANGEDimport com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;
+import com.vinlanx.vinconfig.api.VinConfigPreview;
+import net.minecraft.network.chat.Component;
+
+VinConfigBooleanEntry showHud   = /* ... */;
+VinConfigIntSliderEntry hudScale = /* ... */;
+
+VinConfigBooleanEntry testEntry = VinConfigBooleanEntry
+    .builder("test", Component.literal("Test"), false)
+    .preview((state, value) -> {
+        boolean hud = state.get(showHud);    // read sibling entry
+        int     scale = state.get(hudScale); // read another entry
+        String  img = hud ? "hud_on_" + scale + ".png" : "hud_off.png";
+        return VinConfigPreview.configPic("yourmod", img,
+            Component.literal("HUD preview"),
+            Component.literal("Scale: " + scale + "%"));
+    })
+    .build();
+Advanced
+Persistence & TOML
+How VinConfig saves your config to disk after the user clicks Save.
+The Save Flow
+When the user presses Save (or Ctrl+S), VinConfigState.save() runs this sequence for every entry:
+1. Write value to binding 
+entry.writeBoundValue(state.get(entry)) - calls binding.set(sanitizedValue). For Forge bindings this sets the in-memory Forge config value.
+2. Save the binding 
+entry.saveBoundValue() - calls binding.save(). For Forge bindings this calls ForgeConfigSpec.ConfigValue.save().
+3. Flush TOML to disk 
+VinConfigTomlPersistence.flushTrackedConfigs(modId) iterates all ModConfigs registered for your mod, calls config.save() on each, then calls config.getSpec().afterReload() to fire Forge's post-reload hooks.
+VinConfigTomlPersistence
+You can also call this utility manually if you need to force-flush configs outside of VinConfig's save flow:
+JAVAimport com.vinlanx.vinconfig.api.VinConfigTomlPersistence;
+
+// Flush all currently loaded tracked configs for this modId
+VinConfigTomlPersistence.flushTrackedConfigs("yourmod");
+The method is null-safe and no-ops if the modId is blank or if a config has no data loaded yet.
+afterReload Hook
+After flushing, VinConfig calls config.getSpec().afterReload(). In the current implementation this is used to refresh Forge config spec caches after the file write. VinConfig's save path does not manually post a ModConfigEvent.Reloading event.
+Custom Persistence
+If you don't use ForgeConfigSpec at all, implement the save() method in your VinConfigValueBinding to write to your own storage (file, database, network, etc.). VinConfig calls save() on every binding unconditionally during the save flow.
+Advanced
+Callbacks
+React to value changes in real time - before the user even clicks Save.
+onChanged
+Most value entry builders accept .onChanged((state, value) → ...). It fires on every interaction for those entries: toggle click, slider drag, text input keystroke, or enum cycle. VinConfigActionEntry uses .onPress((state, ignored) → ...) instead.
+The callback receives:
+* VinConfigState state - the full working state. Read any other entry with state.get(otherEntry).
+* T value - the new (already sanitized) value for this specific entry.
+JAVA - APPLY CHANGE IMMEDIATELY TO GAME WORLDimport com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
+
+VinConfigBooleanEntry fullbright = VinConfigBooleanEntry
+    .builder("fullbright", Component.literal("Fullbright"), false)
+    .forge(MyConfig.FULLBRIGHT)
+    .onChanged((state, value) -> {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            mc.options.gamma().set(value ? 100.0 : 0.5);
+            mc.levelRenderer.allChanged();
+        }
+    })
+    .build();
+JAVA - UPDATE MULTIPLE THINGS FROM ONE CHANGE.onChanged((state, value) -> {
+    int scale = state.get(hudScaleEntry);   // read sibling value
+    HudRenderer.setVisibility(value);
+    HudRenderer.setScale(scale / 100.0f);
+})
+preview factory
+The preview factory is also a callback - it's called every time the user hovers that row. Use it to compute which image to display based on the current state, not just the initial value.
+JAVA - MULTI-CONDITION PREVIEW.preview((state, value) -> {
+    boolean shader = state.get(shaderEntry);
+    boolean rtx    = state.get(rtxEntry);
+    String  img;
+    if      (rtx && shader) img = "both.png";
+    else if (rtx)           img = "rtx_only.png";
+    else if (shader)        img = "shader_only.png";
+    else                    img = "vanilla.png";
+    return VinConfigPreview.configPic("yourmod", img,
+        Component.literal("Combined mode"),
+        Component.literal("Result of current settings combination."));
+})
+onChanged fires on every slider drag step, not just release. For expensive operations (network calls, file I/O, level reloads), consider debouncing manually or doing the heavy work inside save() instead.
+Advanced
+Full Example
+A complete, production-ready config setup for a hypothetical visual mod - covering every feature in one place.
+ForgeConfigSpec
+JAVA - VISUALMODCONFIG.JAVApackage com.example.visualmod;
+
+import net.minecraftforge.common.ForgeConfigSpec;
+
+public final class VisualModConfig {
+    public static final ForgeConfigSpec SPEC;
+
+    // Rendering
+    public static final ForgeConfigSpec.BooleanValue RTX_ENABLED;
+    public static final ForgeConfigSpec.EnumValue<Quality> RENDER_QUALITY;
+    public static final ForgeConfigSpec.DoubleValue  BLOOM_INTENSITY;
+
+    // HUD
+    public static final ForgeConfigSpec.BooleanValue SHOW_HUD;
+    public static final ForgeConfigSpec.IntValue    HUD_OPACITY;
+    public static final ForgeConfigSpec.ConfigValue<String> HUD_TITLE;
+
+    // Colors
+    public static final ForgeConfigSpec.IntValue    ACCENT_COLOR;
+    public static final ForgeConfigSpec.IntValue    BG_TOP;
+    public static final ForgeConfigSpec.IntValue    BG_BOTTOM;
+
+    static {
+        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+
+        b.push("rendering");
+        RTX_ENABLED     = b.define("rtx_enabled", false);
+        RENDER_QUALITY  = b.defineEnum("render_quality", Quality.BALANCED);
+        BLOOM_INTENSITY = b.defineInRange("bloom_intensity", 0.5, 0.0, 2.0);
+        b.pop();
+
+        b.push("hud");
+        SHOW_HUD    = b.define("show_hud", true);
+        HUD_OPACITY = b.defineInRange("hud_opacity", 100, 10, 100);
+        HUD_TITLE   = b.define("hud_title", "Visual Mod");
+        b.pop();
+
+        b.push("colors");
+        ACCENT_COLOR = b.defineInRange("accent", 0xFFB454, 0, 0xFFFFFF);
+        BG_TOP       = b.defineInRange("bg_top", 0x0F172A, 0, 0xFFFFFF);
+        BG_BOTTOM    = b.defineInRange("bg_bottom", 0x1E293B, 0, 0xFFFFFF);
+        b.pop();
+
+        SPEC = b.build();
+    }
+
+    public enum Quality {
+        LOW("Low"), BALANCED("Balanced"), HIGH("High"), ULTRA("Ultra");
+        public final String label;
+        Quality(String label) { this.label = label; }
+    }
+}
+Mod Main Class
+JAVA - VISUALMOD.JAVApackage com.example.visualmod;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+
+@Mod("visualmod")
+public final class VisualMod {
+    public static final String MOD_ID = "visualmod";
+
+    public VisualMod() {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, VisualModConfig.SPEC);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            VisualModClient.bootstrap();
+        }
+    }
+}
+Client Bootstrap with Full Definition
+JAVA - VISUALMODCLIENT.JAVApackage com.example.visualmod.client;
+
+import com.example.visualmod.VisualModConfig;
+import com.vinlanx.vinconfig.api.VinConfigActionEntry;
+import com.vinlanx.vinconfig.api.VinConfigBindings;
+import com.vinlanx.vinconfig.api.VinConfigBooleanEntry;
+import com.vinlanx.vinconfig.api.VinConfigCategory;
+import com.vinlanx.vinconfig.api.VinConfigColorEntry;
+import com.vinlanx.vinconfig.api.VinConfigDefinition;
+import com.vinlanx.vinconfig.api.VinConfigDoubleSliderEntry;
+import com.vinlanx.vinconfig.api.VinConfigEnumEntry;
+import com.vinlanx.vinconfig.api.VinConfigIntSliderEntry;
+import com.vinlanx.vinconfig.api.VinConfigPreview;
+import com.vinlanx.vinconfig.api.VinConfigTextEntry;
+import com.vinlanx.vinconfig.api.VinConfigTheme;
+import com.vinlanx.vinconfig.client.VinConfigClientApi;
+import net.minecraft.network.chat.Component;
+
+public final class VisualModClient {
+    private static boolean bootstrapped;
+
+    public static void bootstrap() {
+        if (bootstrapped) return;
+        bootstrapped = true;
+
+        // ── COLOR ENTRIES (needed for liveTheme) ──
+        VinConfigColorEntry accentEntry = VinConfigColorEntry
+            .builder("accent", Component.literal("Accent Color"), 0xFFFFB454)
+            .binding(VinConfigBindings.forge(VisualModConfig.ACCENT_COLOR))
+            .description(Component.literal("UI highlight color for tabs and sliders."))
+            .build();
+
+        VinConfigColorEntry bgTopEntry = VinConfigColorEntry
+            .builder("bg_top", Component.literal("Background Top"), 0xFF0F172A)
+            .binding(VinConfigBindings.forge(VisualModConfig.BG_TOP))
+            .build();
+
+        VinConfigColorEntry bgBottomEntry = VinConfigColorEntry
+            .builder("bg_bottom", Component.literal("Background Bottom"), 0xFF1E293B)
+            .binding(VinConfigBindings.forge(VisualModConfig.BG_BOTTOM))
+            .build();
+
+        // ── RENDERING ENTRIES ──
+        VinConfigBooleanEntry rtx = VinConfigBooleanEntry
+            .builder("rtx_enabled", Component.literal("RTX Lighting"), false)
+            .forge(VisualModConfig.RTX_ENABLED)
+            .description(Component.literal("Enables ray-traced global illumination."))
+            .preview((state, value) -> {
+                String img = value ? "rtx_on.png" : "rtx_off.png";
+                return VinConfigPreview.configPic("visualmod", img,
+                    Component.literal("RTX " + (value ? "Enabled" : "Disabled")),
+                    Component.literal("Dramatic lighting difference when active."));
+            })
+            .onChanged((state, value) -> RenderPipeline.setRtx(value))
+            .build();
+
+        VinConfigEnumEntry<VisualModConfig.Quality> quality = VinConfigEnumEntry
+            .<VisualModConfig.Quality>builder("render_quality",
+                Component.literal("Render Quality"),
+                VisualModConfig.Quality.class,
+                VisualModConfig.Quality.BALANCED)
+            .forge(VisualModConfig.RENDER_QUALITY)
+            .labels(q -> Component.literal(q.label))
+            .description(Component.literal("Affects shadow quality, AO, and reflections."))
+            .preview((state, value) -> {
+                String img = "quality_" + value.name().toLowerCase() + ".png";
+                return VinConfigPreview.configPic("visualmod", img,
+                    Component.literal(value.label + " Quality"),
+                    Component.literal("Visual fidelity at this preset."));
+            })
+            .build();
+
+        VinConfigDoubleSliderEntry bloom = VinConfigDoubleSliderEntry
+            .builder("bloom_intensity", Component.literal("Bloom Intensity"), 0.5, 0.0, 2.0)
+            .forge(VisualModConfig.BLOOM_INTENSITY)
+            .step(0.05)
+            .suffix("x")
+            .description(Component.literal("How bright light glow appears."))
+            .build();
+
+        // ── HUD ENTRIES ──
+        VinConfigBooleanEntry showHud = VinConfigBooleanEntry
+            .builder("show_hud", Component.literal("Show HUD"), true)
+            .forge(VisualModConfig.SHOW_HUD)
+            .description(Component.literal("Toggle the HUD overlay."))
+            .preview((state, value) -> VinConfigPreview.configPic("visualmod",
+                value ? "hud_on.png" : "hud_off.png",
+                Component.literal(value ? "HUD Visible" : "HUD Hidden"),
+                Component.empty()))
+            .build();
+
+        VinConfigIntSliderEntry hudOpacity = VinConfigIntSliderEntry
+            .builder("hud_opacity", Component.literal("HUD Opacity"), 100, 10, 100)
+            .forge(VisualModConfig.HUD_OPACITY)
+            .suffix("%")
+            .description(Component.literal("HUD transparency."))
+            .build();
+
+        VinConfigTextEntry hudTitle = VinConfigTextEntry
+            .builder("hud_title", Component.literal("HUD Label"), "Visual Mod")
+            .forge(VisualModConfig.HUD_TITLE)
+            .maxLength(32)
+            .description(Component.literal("Text shown in the HUD header."))
+            .build();
+
+        VinConfigActionEntry resetRenderer = VinConfigActionEntry
+            .builder("reset_renderer",
+                Component.literal("Reset Renderer"),
+                Component.literal("Reload Shaders"))
+            .description(Component.literal("Force-reloads the rendering pipeline."))
+            .onPress((state, ignored) -> RenderPipeline.reload())
+            .build();
+
+        // ── DEFINITION ──
+        VinConfigDefinition def = VinConfigDefinition
+            .builder("visualmod", Component.literal("Visual Mod"))
+            .subtitle(Component.literal("Cinematic rendering for Minecraft Forge"))
+            .theme(VinConfigTheme.darkCinema())
+            .liveTheme(state -> VinConfigTheme.builder()
+                .backgroundTop   (state.get(bgTopEntry))
+                .backgroundBottom(state.get(bgBottomEntry))
+                .panel           (0xD9172434)
+                .panelSoft       (0xC9111825)
+                .panelStrong     (0xEE0B1120)
+                .accent          (state.get(accentEntry))
+                .textPrimary     (0xFFF8FAFC)
+                .textSecondary   (0xFFCBD5E1)
+                .outline         (0x66FFFFFF)
+                .build())
+            .category(
+                VinConfigCategory.builder("rendering", Component.literal("Rendering"))
+                    .description(Component.literal("RTX, quality presets, and bloom settings."))
+                    .entry(rtx)
+                    .entry(quality)
+                    .entry(bloom)
+                    .build()
+            )
+            .category(
+                VinConfigCategory.builder("hud", Component.literal("HUD"))
+                    .description(Component.literal("Heads-up display visibility and appearance."))
+                    .entry(showHud)
+                    .entry(hudOpacity)
+                    .entry(hudTitle)
+                    .entry(resetRenderer)
+                    .build()
+            )
+            .category(
+                VinConfigCategory.builder("colors", Component.literal("Colors"))
+                    .description(Component.literal("Theme colors - changes apply live."))
+                    .entry(bgTopEntry)
+                    .entry(bgBottomEntry)
+                    .entry(accentEntry)
+                    .build()
+            )
+            .build();
+
+        VinConfigClientApi.registerConfigScreen(def);
+    }
+}
+Reference
+API Reference
+Quick-scan summary of every public class and method in the VinConfig API.
+VinConfigApi
+MethodDescriptiondefinition(modId, title)Shortcut to VinConfigDefinition.builder()register(definition)Add to global registry (thread-safe)get(modId)Retrieve Optional<VinConfigDefinition>VinConfigClientApi
+MethodDescriptionregisterConfigScreen(def)Register + hook Forge mod-list buttonopen(parent, def)Return a new Screen without registeringVinConfigDefinition Builder
+MethodDefaultbuilder(modId, title)-subtitle(component)Component.empty()theme(VinConfigTheme)VinConfigTheme.darkCinema()liveTheme(state → theme)Returns static themebackground(renderer)No-op renderercategory(VinConfigCategory)-build()-Entry Builders - Common Methods
+MethodTypeDescription.description(Component)allTooltip text + row subtitle.binding(VinConfigValueBinding<T>)mostCustom binding.forge(ForgeConfigSpec.*Value)mostShortcut forge binding.preview((state, val) → VinConfigPreview)allPreview panel content.onChanged((state, val) → void)mostChange callback for value entries; VinConfigActionEntry uses .onPress(...)Entry Types Summary
+ClassType TExtra ParametersVinConfigBooleanEntryBoolean-VinConfigIntSliderEntryIntegermin, max, step, suffixVinConfigDoubleSliderEntryDoublemin, max, step, suffixVinConfigTextEntryStringmaxLengthVinConfigEnumEntry<E>E extends EnumenumClass, labels(E → Component)VinConfigColorEntryInteger (ARGB)RGB only (alpha forced to 0xFF)VinConfigActionEntryBoolean (unused)buttonTitle, onPressVinConfigBindings Factory Methods
+MethodDescriptionforge(BooleanValue)Forge boolean bindingforge(IntValue)Forge integer bindingforge(DoubleValue)Forge double bindingforge(EnumValue<E>)Forge enum bindingforge(ConfigValue<String>)Forge string bindingconfigValue(ConfigValue<T>)Generic Forge config valuestandalone(T defaultValue)In-memory only, not persistedof(getter, setter, defaultSupplier, saver)Fully custommapped(ConfigValue<S>, reader, writer)Type-transforming Forge bindingVinConfigPreview Factory Methods
+MethodDescriptionnone()No preview (panel hidden)image(ResourceLocation, title, desc)Explicit resource locationconfigPic(modId, path, title, desc)Shortcut: prepends configpic/, uses modId namespaceVinConfigState Methods
+MethodDescriptionVinConfigState.load(definition)Load from bindingsstate.get(entry)Read value (sanitized)state.set(entry, value)Write value + fire onChangedstate.reset(entry)Revert to defaultValuestate.reset(category)Revert entire categorystate.resetAll()Revert everythingstate.save()Write to bindings + flush TOMLstate.copy()Shallow copy of value mapstate.definition()Get the VinConfigDefinitionVinConfigTheme Builder Fields
+FieldDefault (darkCinema)backgroundTop0xFF111827backgroundBottom0xFF1F2937panel0xD91A2233panelSoft0xCC0F172ApanelStrong0xEE111827accent0xFF4FD1C5textPrimary0xFFF8FAFCtextSecondary0xFFCBD5E1outline0x66FFFFFFKeyboard Shortcuts (In-Screen)
+ShortcutActionCtrl + SSave and stay on the screen (shows "Saved" toast)Scroll wheelScroll the options list (only when inside the content area)Ctrl + SSave and stay on the screen (shows "Saved" toast) - triggers saveAndStay()EscapeClose (same as Close button - does NOT auto-save) - calls onClose()LLM
+Full doc for LLM - Vinconfig.txt
+This page provides the full doc file for language models. Use the button below to open the linked resource.
+The full documentation file is available via the link below:
+Download 
+
