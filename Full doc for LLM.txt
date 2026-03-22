@@ -27,7 +27,7 @@ VinConfig must be present on the client side. Add it as a required dependency in
 MODS.TOML[[dependencies.yourmodid]]
     modId = "vinconfig"
     mandatory = true
-    versionRange = "[0.0.4.2,)"
+    versionRange = "*"  # any version is acceptable
     ordering = "NONE"
     side = "CLIENT"
 Additionally, add the library to your build system so it is available at compile time (example only - verify coordinates for your setup):
@@ -642,11 +642,51 @@ import net.minecraft.network.chat.Component;
 })
 The preview fades in with a smooth animation when switching between entries. The image is drawn with alpha from 0.35 → 1.0 during the fade. A colored accent bar grows in at the bottom of the panel simultaneously.
 Recommended Image Specs
-PropertyRecommendationFormatPNG (with or without transparency)Aspect ratio16:9 or any - VinConfig stretches to fill the preview boxSize256×144 or 512×288 - small enough to load fastLocationassets/yourmod/configpic/name.pngUI & Visuals
+Property
+Recommendation
+Format
+PNG (with or without transparency)
+Aspect ratio
+16:9 or any - VinConfig stretches to fill the preview box
+Size
+256×144 or 512×288 - small enough to load fast
+Location
+assets/yourmod/configpic/name.png
+UI & Visuals
 Theming
 Control every color in the config screen with a VinConfigTheme record. Swap the entire palette in one call.
 VinConfigTheme Fields
-FieldUsed ForDefault (darkCinema)backgroundTopTop gradient color of the full-screen backdrop0xFF111827backgroundBottomBottom gradient color of the backdrop0xFF1F2937panelMain content panel background0xD91A2233panelSoftTab sidebar and content area inset0xCC0F172ApanelStrongPreview panel, hovered rows, button backgrounds0xEE111827accentActive tab, slider fill, scroll knob, outlines, focus ring0xFF4FD1C5textPrimaryTitles, button labels, values0xFFF8FAFCtextSecondaryDescriptions, subtitles, slider channel labels0xFFCBD5E1outlinePanel border, widget outlines0x66FFFFFFColors are ARGB integers: the upper byte is alpha, then red, green, blue. E.g. 0xCC0F172A has alpha = 0xCC ≈ 80% opacity, and RGB = #0F172A.
+Field
+Used For
+Default (darkCinema)
+backgroundTop
+Top gradient color of the full-screen backdrop
+0xFF111827
+backgroundBottom
+Bottom gradient color of the backdrop
+0xFF1F2937
+panel
+Main content panel background
+0xD91A2233
+panelSoft
+Tab sidebar and content area inset
+0xCC0F172A
+panelStrong
+Preview panel, hovered rows, button backgrounds
+0xEE111827
+accent
+Active tab, slider fill, scroll knob, outlines, focus ring
+0xFF4FD1C5
+textPrimary
+Titles, button labels, values
+0xFFF8FAFC
+textSecondary
+Descriptions, subtitles, slider channel labels
+0xFFCBD5E1
+outline
+Panel border, widget outlines
+0x66FFFFFF
+Colors are ARGB integers: the upper byte is alpha, then red, green, blue. E.g. 0xCC0F172A has alpha = 0xCC ≈ 80% opacity, and RGB = #0F172A.
 Using the Built-in Dark Cinema Theme
 JAVAimport com.vinlanx.vinconfig.api.VinConfigDefinition;
 import com.vinlanx.vinconfig.api.VinConfigTheme;
@@ -1159,16 +1199,166 @@ Reference
 API Reference
 Quick-scan summary of every public class and method in the VinConfig API.
 VinConfigApi
-MethodDescriptiondefinition(modId, title)Shortcut to VinConfigDefinition.builder()register(definition)Add to global registry (thread-safe)get(modId)Retrieve Optional<VinConfigDefinition>VinConfigClientApi
-MethodDescriptionregisterConfigScreen(def)Register + hook Forge mod-list buttonopen(parent, def)Return a new Screen without registeringVinConfigDefinition Builder
-MethodDefaultbuilder(modId, title)-subtitle(component)Component.empty()theme(VinConfigTheme)VinConfigTheme.darkCinema()liveTheme(state → theme)Returns static themebackground(renderer)No-op renderercategory(VinConfigCategory)-build()-Entry Builders - Common Methods
-MethodTypeDescription.description(Component)allTooltip text + row subtitle.binding(VinConfigValueBinding<T>)mostCustom binding.forge(ForgeConfigSpec.*Value)mostShortcut forge binding.preview((state, val) → VinConfigPreview)allPreview panel content.onChanged((state, val) → void)mostChange callback for value entries; VinConfigActionEntry uses .onPress(...)Entry Types Summary
-ClassType TExtra ParametersVinConfigBooleanEntryBoolean-VinConfigIntSliderEntryIntegermin, max, step, suffixVinConfigDoubleSliderEntryDoublemin, max, step, suffixVinConfigTextEntryStringmaxLengthVinConfigEnumEntry<E>E extends EnumenumClass, labels(E → Component)VinConfigColorEntryInteger (ARGB)RGB only (alpha forced to 0xFF)VinConfigActionEntryBoolean (unused)buttonTitle, onPressVinConfigBindings Factory Methods
-MethodDescriptionforge(BooleanValue)Forge boolean bindingforge(IntValue)Forge integer bindingforge(DoubleValue)Forge double bindingforge(EnumValue<E>)Forge enum bindingforge(ConfigValue<String>)Forge string bindingconfigValue(ConfigValue<T>)Generic Forge config valuestandalone(T defaultValue)In-memory only, not persistedof(getter, setter, defaultSupplier, saver)Fully custommapped(ConfigValue<S>, reader, writer)Type-transforming Forge bindingVinConfigPreview Factory Methods
-MethodDescriptionnone()No preview (panel hidden)image(ResourceLocation, title, desc)Explicit resource locationconfigPic(modId, path, title, desc)Shortcut: prepends configpic/, uses modId namespaceVinConfigState Methods
-MethodDescriptionVinConfigState.load(definition)Load from bindingsstate.get(entry)Read value (sanitized)state.set(entry, value)Write value + fire onChangedstate.reset(entry)Revert to defaultValuestate.reset(category)Revert entire categorystate.resetAll()Revert everythingstate.save()Write to bindings + flush TOMLstate.copy()Shallow copy of value mapstate.definition()Get the VinConfigDefinitionVinConfigTheme Builder Fields
-FieldDefault (darkCinema)backgroundTop0xFF111827backgroundBottom0xFF1F2937panel0xD91A2233panelSoft0xCC0F172ApanelStrong0xEE111827accent0xFF4FD1C5textPrimary0xFFF8FAFCtextSecondary0xFFCBD5E1outline0x66FFFFFFKeyboard Shortcuts (In-Screen)
-ShortcutActionCtrl + SSave and stay on the screen (shows "Saved" toast)Scroll wheelScroll the options list (only when inside the content area)Ctrl + SSave and stay on the screen (shows "Saved" toast) - triggers saveAndStay()EscapeClose (same as Close button - does NOT auto-save) - calls onClose()LLM
+Method
+Description
+definition(modId, title)
+Shortcut to VinConfigDefinition.builder()
+register(definition)
+Add to global registry (thread-safe)
+get(modId)
+Retrieve Optional<VinConfigDefinition>
+VinConfigClientApi
+Method
+Description
+registerConfigScreen(def)
+Register + hook Forge mod-list button
+open(parent, def)
+Return a new Screen without registering
+VinConfigDefinition Builder
+Method
+Default
+builder(modId, title)
+-
+subtitle(component)
+Component.empty()
+theme(VinConfigTheme)
+VinConfigTheme.darkCinema()
+liveTheme(state → theme)
+Returns static theme
+background(renderer)
+No-op renderer
+category(VinConfigCategory)
+-
+build()
+-
+Entry Builders - Common Methods
+Method
+Type
+Description
+.description(Component)
+all
+Tooltip text + row subtitle
+.binding(VinConfigValueBinding<T>)
+most
+Custom binding
+.forge(ForgeConfigSpec.*Value)
+most
+Shortcut forge binding
+.preview((state, val) → VinConfigPreview)
+all
+Preview panel content
+.onChanged((state, val) → void)
+most
+Change callback for value entries; VinConfigActionEntry uses .onPress(...)
+Entry Types Summary
+Class
+Type T
+Extra Parameters
+VinConfigBooleanEntry
+Boolean
+-
+VinConfigIntSliderEntry
+Integer
+min, max, step, suffix
+VinConfigDoubleSliderEntry
+Double
+min, max, step, suffix
+VinConfigTextEntry
+String
+maxLength
+VinConfigEnumEntry<E>
+E extends Enum
+enumClass, labels(E → Component)
+VinConfigColorEntry
+Integer (ARGB)
+RGB only (alpha forced to 0xFF)
+VinConfigActionEntry
+Boolean (unused)
+buttonTitle, onPress
+VinConfigBindings Factory Methods
+Method
+Description
+forge(BooleanValue)
+Forge boolean binding
+forge(IntValue)
+Forge integer binding
+forge(DoubleValue)
+Forge double binding
+forge(EnumValue<E>)
+Forge enum binding
+forge(ConfigValue<String>)
+Forge string binding
+configValue(ConfigValue<T>)
+Generic Forge config value
+standalone(T defaultValue)
+In-memory only, not persisted
+of(getter, setter, defaultSupplier, saver)
+Fully custom
+mapped(ConfigValue<S>, reader, writer)
+Type-transforming Forge binding
+VinConfigPreview Factory Methods
+Method
+Description
+none()
+No preview (panel hidden)
+image(ResourceLocation, title, desc)
+Explicit resource location
+configPic(modId, path, title, desc)
+Shortcut: prepends configpic/, uses modId namespace
+VinConfigState Methods
+Method
+Description
+VinConfigState.load(definition)
+Load from bindings
+state.get(entry)
+Read value (sanitized)
+state.set(entry, value)
+Write value + fire onChanged
+state.reset(entry)
+Revert to defaultValue
+state.reset(category)
+Revert entire category
+state.resetAll()
+Revert everything
+state.save()
+Write to bindings + flush TOML
+state.copy()
+Shallow copy of value map
+state.definition()
+Get the VinConfigDefinition
+VinConfigTheme Builder Fields
+Field
+Default (darkCinema)
+backgroundTop
+0xFF111827
+backgroundBottom
+0xFF1F2937
+panel
+0xD91A2233
+panelSoft
+0xCC0F172A
+panelStrong
+0xEE111827
+accent
+0xFF4FD1C5
+textPrimary
+0xFFF8FAFC
+textSecondary
+0xFFCBD5E1
+outline
+0x66FFFFFF
+Keyboard Shortcuts (In-Screen)
+Shortcut
+Action
+Ctrl + S
+Save and stay on the screen (shows "Saved" toast)
+Scroll wheel
+Scroll the options list (only when inside the content area)
+Ctrl + S
+Save and stay on the screen (shows "Saved" toast) - triggers saveAndStay()
+Escape
+Close (same as Close button - does NOT auto-save) - calls onClose()
+LLM
 Full doc for LLM - Vinconfig.txt
 This page provides the full doc file for language models. Use the button below to open the linked resource.
 The full documentation file is available via the link below:
